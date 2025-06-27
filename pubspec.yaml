@@ -1,0 +1,41 @@
+name: calculator
+description: "A calculator that fits into the Nothing OS ecosystem of apps."
+
+publish_to: "none"
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.8.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  flutter_svg: ^2.2.0
+  pixel_perfect: ^1.1.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/
+    - assets/fonts/
+    - assets/icons/
+
+  fonts:
+    - family: Ndot-55
+      fonts:
+        - asset: assets/fonts/Ndot-55.otf
+    - family: Ntype-82
+      fonts:
+        - asset: assets/fonts/NType82-Regular.otf
+    - family: LetteraMono
+      fonts:
+        - asset: assets/fonts/LetteraMonoLL-Regular.otf
