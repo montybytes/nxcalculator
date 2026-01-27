@@ -193,14 +193,26 @@ class _HomeScreenState extends State<HomeScreen> {
       items: const [
         PopupMenuItem(
           value: "clear_history",
-          child: Text("Clear History", style: TextStyle(fontSize: 20)),
+          child: Text("Clear History", style: TextStyle(fontSize: 18)),
         ),
       ],
     );
 
     switch (value) {
       case "clear_history":
-        await _repo.clearHistory();
+        if (mounted) {
+          final shouldClear = await showDialog<bool>(
+            context: context,
+            builder: (context) => const ConfirmActionDialog(
+              titleText: "Clear History",
+              infoText: "Are you sure you want to clear all history?",
+            ),
+          );
+
+          if (shouldClear ?? false) {
+            await _repo.clearHistory();
+          }
+        }
       default:
     }
   }
