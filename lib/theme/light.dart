@@ -18,6 +18,8 @@ final lightTheme = ThemeData(
   ),
   cardTheme: cardDefaultTheme.copyWith(color: lightThemeCard),
   dialogTheme: const DialogThemeData(backgroundColor: lightThemeBackground),
-  bottomSheetTheme: const BottomSheetThemeData(backgroundColor: lightThemeCard),
+  bottomSheetTheme: const BottomSheetThemeData(
+    backgroundColor: lightThemeBackground,
+  ),
   dividerColor: lightThemeText,
 );

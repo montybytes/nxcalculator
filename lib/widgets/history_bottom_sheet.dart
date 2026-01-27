@@ -66,7 +66,9 @@ class _HistoryBottomSheetState extends State<HistoryBottomSheet> {
                                     widget.history.length,
                                   ).borderRadius,
                                 ),
-                                child: Image.asset("assets/icons/delete.png"),
+                                child: Image.asset(
+                                  "assets/icons/dark/delete.png",
+                                ),
                               ),
                               onDismissed: (direction) {
                                 widget.onDelete?.call(index);
@@ -79,7 +81,7 @@ class _HistoryBottomSheetState extends State<HistoryBottomSheet> {
                                 ),
                                 color: isDark
                                     ? darkThemeListItem
-                                    : lightThemeListItem,
+                                    : lightThemeCard,
 
                                 child: InkWell(
                                   onTap: () => Navigator.of(context).pop(item),

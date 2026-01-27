@@ -43,20 +43,26 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               actions: [
                 IconButton(
-                  tooltip: "Show History",
-                  icon: Image.asset("assets/icons/history.png"),
+                  tooltip: "History",
+                  icon: _isDark
+                      ? Image.asset("assets/icons/dark/history.png")
+                      : Image.asset("assets/icons/light/history.png"),
                   padding: const EdgeInsets.all(14),
                   onPressed: _showHistory,
                 ),
                 IconButton(
-                  tooltip: "Scientific Mode",
+                  tooltip: "Scientific",
                   icon: Container(
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
                       color: _isExtended ? nothingRed : null,
                       shape: BoxShape.circle,
                     ),
-                    child: Image.asset("assets/icons/function.png"),
+                    child: _isDark
+                        ? Image.asset("assets/icons/dark/function.png")
+                        : _isExtended
+                        ? Image.asset("assets/icons/dark/function.png")
+                        : Image.asset("assets/icons/light/function.png"),
                   ),
                   padding: const EdgeInsets.all(10),
                   onPressed: _toggleMode,
@@ -64,7 +70,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 IconButton(
                   tooltip: "Options",
                   key: _menuKey,
-                  icon: Image.asset("assets/icons/more.png"),
+                  icon: _isDark
+                      ? Image.asset("assets/icons/dark/more.png")
+                      : Image.asset("assets/icons/light/more.png"),
                   padding: const EdgeInsets.all(14),
                   onPressed: _showPopupMenu,
                 ),
@@ -211,7 +219,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final value = await showMenu<String>(
       context: context,
-      color: _isDark ? darkThemeCard : lightThemeCard,
+      color: _isDark ? darkThemeBackground : lightThemeBackground,
       shape: buildListTileBorder(0, 1),
       position: position,
       items: const [
