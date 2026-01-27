@@ -3,7 +3,7 @@ description: "A calculator that fits into the Nothing OS ecosystem of apps."
 
 publish_to: "none"
 
-version: 1.0.0+1
+version: 1.0.0-a+2
 
 environment:
   sdk: ^3.8.1
@@ -37,3 +37,6 @@ flutter:
     - family: LetteraMono
       fonts:
         - asset: assets/fonts/LetteraMonoLL-Regular.otf
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter.ttf
