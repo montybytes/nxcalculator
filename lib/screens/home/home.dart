@@ -6,6 +6,7 @@ import "package:nxcalculator/screens/home/widgets/result_text_field.dart";
 import "package:nxcalculator/theme/constants.dart";
 import "package:nxcalculator/utils/ui.dart";
 import "package:nxcalculator/widgets/basic_keypad.dart";
+import "package:nxcalculator/widgets/confirm_action_dialog.dart";
 import "package:nxcalculator/widgets/extended_keypad.dart";
 import "package:nxcalculator/widgets/history_bottom_sheet.dart";
 
@@ -28,57 +29,49 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          "Calculator",
-          style: TextStyle(fontFamily: "Ntype-82", fontSize: 32),
-          strutStyle: StrutStyle(forceStrutHeight: true, fontSize: 32),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(kToolbarHeight),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.only(left: 24),
+            child: AppBar(
+              titleSpacing: 0,
+              title: const Text(
+                "Calculator",
+                style: TextStyle(fontFamily: "Ntype-82", fontSize: 36),
+                strutStyle: StrutStyle(forceStrutHeight: true, fontSize: 36),
+              ),
+              actions: [
+                IconButton(
+                  tooltip: "Show History",
+                  icon: Image.asset("assets/icons/history.png"),
+                  padding: const EdgeInsets.all(14),
+                  onPressed: _showHistory,
+                ),
+                IconButton(
+                  tooltip: "Scientific Mode",
+                  icon: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: _isExtended ? nothingRed : null,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Image.asset("assets/icons/function.png"),
+                  ),
+                  padding: const EdgeInsets.all(10),
+                  onPressed: _toggleMode,
+                ),
+                IconButton(
+                  tooltip: "Options",
+                  key: _menuKey,
+                  icon: Image.asset("assets/icons/more.png"),
+                  padding: const EdgeInsets.all(14),
+                  onPressed: _showPopupMenu,
+                ),
+              ],
+            ),
+          ),
         ),
-        actions: [
-          IconButton(
-            onPressed: () async {
-              final result = await showModalBottomSheet<HistoryItem>(
-                context: context,
-                showDragHandle: true,
-                scrollControlDisabledMaxHeightRatio: 0.6,
-                builder: (context) {
-                  return FutureBuilder(
-                    future: _repo.loadHistory(),
-                    builder: (context, asyncSnapshot) {
-                      return HistoryBottomSheet(
-                        history: _repo.history,
-                        onDelete: (index) async {
-                          _repo.history.removeAt(index);
-                          await _repo.saveHistory(checkLast: false);
-                        },
-                      );
-                    },
-                  );
-                },
-              );
-
-              if (result != null) {
-                _repo.clear();
-                _repo.addDigit(result.result);
-              }
-            },
-            icon: Image.asset("assets/icons/history.png"),
-            padding: const EdgeInsets.all(14),
-          ),
-          IconButton(
-            onPressed: () {
-              setState(() => _isExtended = !_isExtended);
-            },
-            icon: Image.asset("assets/icons/function.png"),
-            padding: const EdgeInsets.all(14),
-          ),
-          IconButton(
-            key: _menuKey,
-            icon: Image.asset("assets/icons/more.png"),
-            onPressed: _showPopupMenu,
-            padding: const EdgeInsets.all(14),
-          ),
-        ],
       ),
       body: SafeArea(
         child: Padding(
@@ -170,6 +163,37 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  void _toggleMode() {
+    setState(() => _isExtended = !_isExtended);
+  }
+
+  Future<void> _showHistory() async {
+    final result = await showModalBottomSheet<HistoryItem>(
+      context: context,
+      showDragHandle: true,
+      scrollControlDisabledMaxHeightRatio: 0.6,
+      builder: (context) {
+        return FutureBuilder(
+          future: _repo.loadHistory(),
+          builder: (context, asyncSnapshot) {
+            return HistoryBottomSheet(
+              history: _repo.history,
+              onDelete: (index) async {
+                _repo.history.removeAt(index);
+                await _repo.saveHistory(checkLast: false);
+              },
+            );
+          },
+        );
+      },
+    );
+
+    if (result != null) {
+      _repo.clear();
+      _repo.addDigit(result.result);
+    }
   }
 
   Future<void> _showPopupMenu() async {

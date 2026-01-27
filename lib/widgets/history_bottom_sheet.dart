@@ -30,7 +30,7 @@ class _HistoryBottomSheetState extends State<HistoryBottomSheet> {
               ? const Center(
                   child: Text(
                     "No items to display",
-                    style: TextStyle(fontSize: 20),
+                    style: TextStyle(fontSize: 18),
                   ),
                 )
               : ListView.separated(
