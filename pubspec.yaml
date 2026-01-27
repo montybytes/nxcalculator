@@ -11,8 +11,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
-  flutter_svg: ^2.2.0
   intl: ^0.20.2
   math_expressions: ^3.1.0
   provider: ^6.1.5
@@ -28,7 +26,8 @@ flutter:
   assets:
     - assets/
     - assets/fonts/
-    - assets/icons/
+    - assets/icons/light/
+    - assets/icons/dark/
 
   fonts:
     - family: Ntype-82
