@@ -1,28 +1,50 @@
-# This file configures the analyzer, which statically analyzes Dart code to
-# check for errors, warnings, and lints.
-#
-# The issues identified by the analyzer are surfaced in the UI of Dart-enabled
-# IDEs (https://dart.dev/tools#ides-and-editors). The analyzer can also be
-# invoked from the command line by running `flutter analyze`.
-
-# The following line activates a set of recommended lints for Flutter apps,
-# packages, and plugins designed to encourage good coding practices.
 include: package:flutter_lints/flutter.yaml
 
-linter:
-  # The lint rules applied to this project can be customized in the
-  # section below to disable rules from the `package:flutter_lints/flutter.yaml`
-  # included above or to enable additional rules. A list of all available lints
-  # and their documentation is published at https://dart.dev/lints.
-  #
-  # Instead of disabling a lint rule for the entire project in the
-  # section below, it can also be suppressed for a single line of code
-  # or a specific dart file by using the `// ignore: name_of_lint` and
-  # `// ignore_for_file: name_of_lint` syntax on the line or in the file
-  # producing the lint.
-  rules:
-    # avoid_print: false  # Uncomment to disable the `avoid_print` rule
-    # prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
+analyzer:
+  errors:
+    flutter_style_todos: ignore
+    camel_case_types: ignore
+  plugins:
+    - custom_lint
 
-# Additional information about this file can be found at
-# https://dart.dev/guides/language/analysis-options
+linter:
+  rules:
+    - always_declare_return_types
+    - always_put_control_body_on_new_line
+    - always_put_required_named_parameters_first
+    - avoid_catching_errors
+    - avoid_dynamic_calls
+    - avoid_field_initializers_in_const_classes
+    - avoid_slow_async_io
+    - avoid_void_async
+    - depend_on_referenced_packages
+    - do_not_use_environment
+    - flutter_style_todos
+    - leading_newlines_in_multiline_strings
+    - matching_super_parameters
+    - no_runtimeType_toString
+    - omit_obvious_local_variable_types
+    - omit_obvious_property_types
+    - only_throw_errors
+    - prefer_const_constructors
+    - prefer_constructors_over_static_methods
+    - prefer_final_in_for_each
+    - prefer_final_locals
+    - prefer_int_literals
+    - prefer_mixin
+    - prefer_null_aware_method_calls
+    - prefer_void_to_null
+    - prefer_double_quotes
+    - sort_pub_dependencies
+    - throw_in_finally
+    - unawaited_futures
+    - unnecessary_breaks
+    - unnecessary_raw_strings
+    - unnecessary_underscores
+    - use_colored_box
+    - use_decorated_box
+    - use_enums
+    - use_named_constants
+    - use_null_aware_elements
+    - use_truncating_division
+    - use_to_and_as_if_applicable
