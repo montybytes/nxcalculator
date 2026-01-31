@@ -151,6 +151,16 @@ void main() {
       expect(repo.cursor, repo.equation.length);
     });
 
+    test("replace operator", () {
+      final repo = CalculatorRepository();
+
+      repo.addDigit("1");
+      repo.addOperation("+");
+      repo.addOperation("-");
+      repo.addFunction("{power}");
+      expect(repo.equation, ["1", "^"]);
+    });
+
     test("clear all inputs", () {
       final repo = CalculatorRepository();
 

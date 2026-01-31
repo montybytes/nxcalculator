@@ -42,6 +42,9 @@ class CalculatorRepository with ChangeNotifier {
 
   bool _isConstant(String s) => s == "π" || s == "e";
 
+  bool _isOperator(String s) =>
+      s == "+" || s == "-" || s == "÷" || s == "×" || s == "^";
+
   bool _isImpliedValue(String s) =>
       _isNumber(s) ||
       _isConstant(s) ||
@@ -154,6 +157,12 @@ class CalculatorRepository with ChangeNotifier {
 
     final prev = equation[cursor - 1];
 
+    if (_isOperator(prev)) {
+      equation[cursor - 1] = operation;
+      notifyListeners();
+      return;
+    }
+
     if (!_isImpliedValue(prev)) {
       return;
     }
@@ -187,6 +196,12 @@ class CalculatorRepository with ChangeNotifier {
 
         if (_isNumber(prev) || _isConstant(prev) || prev == ")") {
           _insertToken("^");
+          break;
+        }
+
+        if (_isOperator(prev)) {
+          equation[cursor - 1] = "^";
+          break;
         }
       case "{factorial}":
         if (cursor == 0) {
