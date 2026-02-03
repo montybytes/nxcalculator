@@ -219,7 +219,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final value = await showMenu<String>(
       context: context,
-      color: _isDark ? darkThemeBackground : lightThemeBackground,
+      color: _isDark ? darkThemeCard : lightThemeCard,
       shape: buildListTileBorder(0, 1),
       position: position,
       items: const [
