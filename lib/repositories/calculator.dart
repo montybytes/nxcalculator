@@ -309,9 +309,9 @@ class CalculatorRepository with ChangeNotifier {
   void evaluate() {
     result = "";
 
-    final finalEquation = _convertTrigForMode(_getFormattedEquation());
-
     try {
+      final finalEquation = _convertTrigForMode(_getFormattedEquation());
+
       final parser = GrammarParser();
       final expression = parser.parse(finalEquation);
 
@@ -401,11 +401,16 @@ class CalculatorRepository with ChangeNotifier {
 
   String _getFormattedEquation() {
     final buffer = <String>[];
+    var chainedFactorialCounter = 0;
 
     for (var i = 0; i < equation.length; i++) {
       final current = equation[i];
 
       buffer.add(current);
+
+      if (current == "!") {
+        chainedFactorialCounter++;
+      }
 
       if (i == equation.length - 1) {
         continue;
@@ -417,12 +422,27 @@ class CalculatorRepository with ChangeNotifier {
         continue;
       }
 
+      if (current == "+" ||
+          current == "-" ||
+          current == "÷" ||
+          current == "×") {
+        chainedFactorialCounter--;
+      }
+
+      if (current == "!" && (_isNumber(next) || _isConstant(next))) {
+        chainedFactorialCounter--;
+      }
+
       final needsMultiplication =
           _isImpliedValue(current) && _isLeadingValue(next);
 
       if (needsMultiplication) {
         buffer.add("*");
       }
+    }
+
+    if (chainedFactorialCounter > 1) {
+      throw const FormatException("Chained factorials not supported");
     }
 
     // Close all unclosed brackets

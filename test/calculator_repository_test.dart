@@ -322,6 +322,30 @@ void main() {
       repo.evaluate();
       expect(repo.result, "0.5");
     });
+
+    test("evaluate chained factorials", () {
+      final repo = CalculatorRepository();
+
+      repo.addBracket();
+      repo.addBracket();
+      repo.addDigit("2");
+      repo.addFunction("{factorial}");
+      repo.addBracket();
+      repo.addFunction("{factorial}");
+      repo.addBracket();
+      repo.addFunction("{factorial}");
+      repo.evaluate();
+      expect(repo.result, "Format Error");
+
+      repo.clear();
+
+      repo.addDigit("3");
+      repo.addFunction("{factorial}");
+      repo.addDigit("3");
+      repo.addFunction("{factorial}");
+      repo.evaluate();
+      expect(repo.result, "36");
+    });
   });
 
   group("Test history storage operations", () {
