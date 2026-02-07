@@ -3,23 +3,37 @@ import "package:nxcalculator/theme/constants.dart";
 
 InlineSpan getEquationText(
   String text, {
-  required double fontSize,
-  required double verticalOffset,
+  required double superFontSize,
+  required double superVerticalOffset,
 }) {
   if (text == "^2") {
     return WidgetSpan(
       alignment: PlaceholderAlignment.top,
       child: Transform.translate(
-        offset: Offset(0, verticalOffset),
+        offset: Offset(0, superVerticalOffset),
         child: Text(
           text.replaceAll("^", ""),
           textScaler: const TextScaler.linear(0.7),
-          style: TextStyle(fontSize: fontSize),
+          style: TextStyle(fontSize: superFontSize),
         ),
       ),
     );
   }
   return TextSpan(text: text);
+}
+
+WidgetSpan superscript(String text) {
+  return WidgetSpan(
+    alignment: PlaceholderAlignment.top,
+    child: Transform.translate(
+      offset: const Offset(0, -6),
+      child: Text(
+        text,
+        textScaler: const TextScaler.linear(0.7),
+        style: const TextStyle(fontSize: 20),
+      ),
+    ),
+  );
 }
 
 RoundedRectangleBorder buildListTileBorder(int index, int listLength) {

@@ -1,20 +1,21 @@
 import "package:flutter/material.dart";
+import "package:intl/intl.dart";
 import "package:math_expressions/math_expressions.dart";
 import "package:nxcalculator/models/history_item.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 /* 
-Rules of this calculator (implied & hard-coded)
-1. The percantage operator is applied only to the last token
-2. If the last token is a closing bracket, the percentage operator applies to
-    computed value of the grouping
-3. Implicit multiplication is applied when a digit/function is placed next to 
-    another function/symbol
-4. Operators cannot be chained except if the leading operator is the percentage 
-    operator
-5. Closing brackets are automatically placed at the end of the equation if none 
-    are supplied
-6. One can only apply a square to a number/constant once
+  Rules of this calculator (implied & hard-coded)
+  1. The percantage operator is applied only to the last token
+  2. If the last token is a closing bracket, the percentage operator applies to
+      computed value of the grouping
+  3. Implicit multiplication is applied when a digit/function is placed next to 
+      another function/symbol
+  4. Operators cannot be chained except if the leading operator is the percentage 
+      operator
+  5. Closing brackets are automatically placed at the end of the equation if none 
+      are supplied
+  6. One can only apply a square to a number/constant once
 */
 
 const calculatorHistoryKey = "calculator_history";
@@ -27,7 +28,8 @@ class CalculatorRepository with ChangeNotifier {
   final history = <HistoryItem>[];
 
   var result = "";
-  var _mode = "DEG";
+  var error = "";
+  var mode = "DEG";
 
   var _openBrackets = 0;
   var inverted = false;
@@ -35,8 +37,8 @@ class CalculatorRepository with ChangeNotifier {
   var cursor = 0;
 
   /*
-    Helper Functions
-  */
+   * Helper Functions
+   */
 
   bool _isNumber(String s) => RegExp(r"(\d+)(\.?\d+)?").hasMatch(s);
 
@@ -75,7 +77,7 @@ class CalculatorRepository with ChangeNotifier {
     return true;
   }
 
-  void _insertToken(String token) {
+  void insertToken(String token) {
     equation.insert(cursor, token);
     cursor++;
 
@@ -85,32 +87,57 @@ class CalculatorRepository with ChangeNotifier {
     if (token == ")") {
       _openBrackets--;
     }
+
+    evaluate();
+    notifyListeners();
   }
 
   void setCursorFromCharOffset(int offset) {
+    if (offset <= 0) {
+      cursor = 0;
+      notifyListeners();
+      return;
+    }
+
     var count = 0;
 
     for (var i = 0; i < equation.length; i++) {
-      count += equation[i].length;
-      if (offset <= count) {
-        cursor = i + 1;
+      final tokenLength = equation[i].length;
+      final start = count;
+      final end = count + tokenLength;
+
+      if (offset <= start) {
+        cursor = i;
+        notifyListeners();
         return;
       }
+
+      if (offset <= end) {
+        cursor = i + 1;
+        notifyListeners();
+        return;
+      }
+
+      count = end;
     }
+    
     cursor = equation.length;
     notifyListeners();
   }
 
   /*
-    Calculator Functions
-  */
+   * Calculator Functions
+   */
 
   void addDigit(String digit) {
     final chars = digit.split("");
     for (final char in chars) {
-      _insertToken(char);
+      insertToken(char);
     }
-    notifyListeners();
+  }
+
+  void addConstant(String constant) {
+    insertToken(constant);
   }
 
   void addDecimal() {
@@ -134,59 +161,49 @@ class CalculatorRepository with ChangeNotifier {
       }
     }
 
-    _insertToken(".");
-    notifyListeners();
+    insertToken(".");
   }
 
   void addOperation(String operation) {
-    if (operation == "-") {
-      /* 
-      If required to support binary operators, add the following check:
-      RegExp(r"^[+\-×÷^]$").hasMatch(equation[cursor - 1])
-      */
-      if (cursor == 0 || equation[cursor - 1].endsWith("(")) {
-        _insertToken(operation);
-        notifyListeners();
-        return;
-      }
-    }
-
     if (cursor == 0) {
+      if (operation == "-") {
+        insertToken(operation);
+      }
       return;
     }
 
     final prev = equation[cursor - 1];
 
+    if (operation == "-" && prev.endsWith("(")) {
+      insertToken(operation);
+      return;
+    }
+
     if (_isOperator(prev)) {
       equation[cursor - 1] = operation;
+      evaluate();
       notifyListeners();
       return;
     }
 
-    if (!_isImpliedValue(prev)) {
+    if (_isImpliedValue(prev)) {
+      insertToken(operation);
       return;
     }
-
-    _insertToken(operation);
-    notifyListeners();
   }
 
   void addFunction(String function) {
     switch (function) {
       case "{sin}":
-        _insertToken(inverted ? "arcsin(" : "sin(");
+        insertToken(inverted ? "arcsin(" : "sin(");
       case "{cos}":
-        _insertToken(inverted ? "arccos(" : "cos(");
+        insertToken(inverted ? "arccos(" : "cos(");
       case "{tan}":
-        _insertToken(inverted ? "arctan(" : "tan(");
+        insertToken(inverted ? "arctan(" : "tan(");
       case "{ln}":
-        _insertToken(inverted ? "exp(" : "ln(");
+        insertToken(inverted ? "exp(" : "ln(");
       case "{log}":
-        _insertToken(inverted ? "10^(" : "log(");
-      case "{exponent}":
-        _insertToken("e");
-      case "{pi}":
-        _insertToken("π");
+        insertToken(inverted ? "10^(" : "log(");
       case "{power}":
         if (cursor == 0) {
           return;
@@ -195,7 +212,7 @@ class CalculatorRepository with ChangeNotifier {
         final prev = equation[cursor - 1];
 
         if (_isNumber(prev) || _isConstant(prev) || prev == ")") {
-          _insertToken("^");
+          insertToken("^");
           break;
         }
 
@@ -211,7 +228,7 @@ class CalculatorRepository with ChangeNotifier {
         final prev = equation[cursor - 1];
 
         if (_isNumber(prev) || _isConstant(prev) || prev == ")") {
-          _insertToken("!");
+          insertToken("!");
         }
       case "{root}":
         if (inverted) {
@@ -222,20 +239,18 @@ class CalculatorRepository with ChangeNotifier {
           final prev = equation[cursor - 1];
 
           if (_isNumber(prev) || _isConstant(prev) || prev == ")") {
-            _insertToken("^2");
+            insertToken("^2");
           }
         } else {
-          _insertToken("sqrt(");
+          insertToken("sqrt(");
         }
       default:
     }
-    notifyListeners();
   }
 
   void addBracket() {
     if (cursor == 0) {
-      _insertToken("(");
-      notifyListeners();
+      insertToken("(");
       return;
     }
 
@@ -244,8 +259,7 @@ class CalculatorRepository with ChangeNotifier {
         equation.isEmpty ||
         equation[cursor - 1].contains(RegExp(r"[+\-×÷(]"));
 
-    _insertToken(canOpen ? "(" : ")");
-    notifyListeners();
+    insertToken(canOpen ? "(" : ")");
   }
 
   void addPercent() {
@@ -256,9 +270,7 @@ class CalculatorRepository with ChangeNotifier {
     final prev = equation[cursor - 1];
 
     if (_isNumber(prev) || _isConstant(prev) || prev == ")") {
-      _insertToken("%");
-
-      notifyListeners();
+      insertToken("%");
     }
   }
 
@@ -285,6 +297,7 @@ class CalculatorRepository with ChangeNotifier {
       clear();
     }
 
+    evaluate();
     notifyListeners();
   }
 
@@ -292,54 +305,66 @@ class CalculatorRepository with ChangeNotifier {
     _openBrackets = 0;
     cursor = 0;
     result = "";
+    error = "";
     equation.clear();
     notifyListeners();
   }
 
   void invertFunctions() {
     inverted = !inverted;
-  }
-
-  void toggleMode(String mode) {
-    _mode = mode;
-
     notifyListeners();
   }
 
-  void evaluate() {
-    result = "";
+  void toggleMode() {
+    mode = mode == "DEG" ? "RAD" : "DEG";
+    evaluate();
+    notifyListeners();
+  }
 
-    final finalEquation = _convertTrigForMode(_getFormattedEquation());
+  void evaluate({bool printError = false}) {
+    if (equation.isEmpty) {
+      return;
+    }
 
     try {
+      final finalEquation = _convertTrigForMode(_getFormattedEquation());
+
       final parser = GrammarParser();
       final expression = parser.parse(finalEquation);
 
       final model = ContextModel();
       final value = RealEvaluator(model).evaluate(expression);
 
-      if (value.isNaN) {
-        result = "Domain Error";
-      } else if (value.isInfinite) {
-        result = "Infinity";
-      } else if (value % 1 == 0) {
-        result = value.toStringAsFixed(0);
+      // print("Tokens: $equation");
+      // print("Final Equation: $finalEquation");
+      // print("Evaluation: $value");
+
+      if (value.isNaN && printError) {
+        error = "Domain Error";
+        result = "";
       } else {
-        result = value.toStringAsFixed(12).replaceFirst(RegExp(r"\.?0+$"), "");
+        result = _getFormattedResult(value);
       }
     } catch (e) {
-      if (equation.isNotEmpty && e is FormatException) {
-        result = "Format Error";
-      } else {
-        result = "Error";
+      // print("Error: $e");
+
+      if (printError) {
+        result = "";
+
+        if (equation.isNotEmpty && e is FormatException) {
+          error = "Format Error";
+        } else {
+          error = "Error";
+        }
       }
+    } finally {
+      notifyListeners();
     }
-    notifyListeners();
   }
 
   /*
-    Local Storage Functions
-  */
+   * Local Storage Functions
+   */
 
   Future<bool> saveHistory({bool checkLast = true}) async {
     final item = HistoryItem(result: result, equation: [...equation]);
@@ -399,13 +424,27 @@ class CalculatorRepository with ChangeNotifier {
     notifyListeners();
   }
 
+  /*
+   * Equation & Result Formatting Helpers
+   */
+
   String _getFormattedEquation() {
     final buffer = <String>[];
+    var chainedFactorialCounter = 0;
 
     for (var i = 0; i < equation.length; i++) {
       final current = equation[i];
 
-      buffer.add(current);
+      if (current.contains("E")) {
+        final parts = current.split("E");
+        buffer.add("${parts.first}×10^(${parts.last})");
+      } else {
+        buffer.add(current);
+      }
+
+      if (current == "!") {
+        chainedFactorialCounter++;
+      }
 
       if (i == equation.length - 1) {
         continue;
@@ -417,12 +456,28 @@ class CalculatorRepository with ChangeNotifier {
         continue;
       }
 
+      if ((current == "+" ||
+              current == "-" ||
+              current == "÷" ||
+              current == "×") &&
+          chainedFactorialCounter > 1) {
+        chainedFactorialCounter--;
+      }
+
+      if (current == "!" && (_isNumber(next) || _isConstant(next))) {
+        chainedFactorialCounter--;
+      }
+
       final needsMultiplication =
           _isImpliedValue(current) && _isLeadingValue(next);
 
       if (needsMultiplication) {
         buffer.add("*");
       }
+    }
+
+    if (chainedFactorialCounter > 1) {
+      throw const FormatException("Too many factorials");
     }
 
     // Close all unclosed brackets
@@ -441,7 +496,7 @@ class CalculatorRepository with ChangeNotifier {
   }
 
   String _convertTrigForMode(String equation) {
-    if (_mode == "RAD") {
+    if (mode == "RAD") {
       return equation;
     }
 
@@ -504,5 +559,21 @@ class CalculatorRepository with ChangeNotifier {
     }
 
     return convertRecursively(equation);
+  }
+
+  String _getFormattedResult(num value) {
+    if (value.isInfinite) {
+      return "Infinity";
+    }
+
+    final formatter = NumberFormat.decimalPattern(Intl.defaultLocale);
+    formatter.maximumFractionDigits = 9;
+
+    if (value.toString().contains(RegExp(r"e[\+\-]"))) {
+      final parts = value.toString().split("e");
+      return "${formatter.format(double.parse(parts.first))}E${parts.last}";
+    }
+
+    return formatter.format(value);
   }
 }

@@ -1,9 +1,16 @@
 import "package:flutter/material.dart";
 
 class ResultTextField extends StatelessWidget {
-  const ResultTextField({required this.result, super.key});
+  const ResultTextField({
+    required this.result,
+    this.error,
+    this.style,
+    super.key,
+  });
 
   final String result;
+  final String? error;
+  final TextStyle? style;
 
   @override
   Widget build(BuildContext context) {
@@ -14,14 +21,8 @@ class ResultTextField extends StatelessWidget {
         maxLines: 1,
         scrollPhysics: const NeverScrollableScrollPhysics(),
         TextSpan(
-          text: result,
-          style: TextStyle(
-            height: 1,
-            fontSize: result.length >= 15 ? 36 : 48,
-            letterSpacing: -8,
-            color: Colors.grey[700],
-            fontFamily: "LetteraMono",
-          ),
+          text: result == "" && error != null ? error : result,
+          style: style,
         ),
       ),
     );

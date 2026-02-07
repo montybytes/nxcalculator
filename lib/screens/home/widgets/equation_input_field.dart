@@ -6,10 +6,12 @@ class EquationInputField extends StatelessWidget {
     required this.shrink,
     required this.equation,
     required this.onSelectionChanged,
+    this.style,
     super.key,
   });
 
   final bool shrink;
+  final TextStyle? style;
   final List<String> equation;
   final Function(int cursorPosition)? onSelectionChanged;
 
@@ -20,27 +22,29 @@ class EquationInputField extends StatelessWidget {
       scrollDirection: Axis.horizontal,
       child: SelectableText.rich(
         maxLines: 1,
-        autofocus: true,
         showCursor: true,
         scrollPhysics: const NeverScrollableScrollPhysics(),
         textAlign: TextAlign.end,
         strutStyle: StrutStyle(
           forceStrutHeight: true,
-          fontSize: shrink ? 52 : 64,
+          fontSize: style?.fontSize,
         ),
         onSelectionChanged: (selection, cause) {
-          if (selection.start == selection.end) {
-            onSelectionChanged?.call(selection.start);
+          if (cause == SelectionChangedCause.drag ||
+              cause == SelectionChangedCause.tap) {
+            if (selection.start == selection.end) {
+              onSelectionChanged?.call(selection.start);
+            }
           }
         },
         TextSpan(
-          style: TextStyle(
-            letterSpacing: -8,
-            fontFamily: "LetteraMono",
-            fontSize: shrink ? 52 : 64,
-          ),
+          style: style,
           children: equation.map((text) {
-            return getEquationText(text, fontSize: 32, verticalOffset: -16);
+            return getEquationText(
+              text,
+              superFontSize: 32,
+              superVerticalOffset: -16,
+            );
           }).toList(),
         ),
       ),
