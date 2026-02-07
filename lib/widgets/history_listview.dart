@@ -3,17 +3,23 @@ import "package:nxcalculator/models/history_item.dart";
 import "package:nxcalculator/theme/constants.dart";
 import "package:nxcalculator/utils/ui.dart";
 
-class HistoryBottomSheet extends StatefulWidget {
-  const HistoryBottomSheet({required this.history, this.onDelete, super.key});
+class HistoryListview extends StatefulWidget {
+  const HistoryListview({
+    required this.history,
+    this.onDelete,
+    this.onTapItem,
+    super.key,
+  });
 
   final List<HistoryItem> history;
   final void Function(int index)? onDelete;
+  final void Function(HistoryItem item)? onTapItem;
 
   @override
-  State<HistoryBottomSheet> createState() => _HistoryBottomSheetState();
+  State<HistoryListview> createState() => _HistoryListviewState();
 }
 
-class _HistoryBottomSheetState extends State<HistoryBottomSheet> {
+class _HistoryListviewState extends State<HistoryListview> {
   @override
   Widget build(BuildContext context) {
     final isDark = MediaQuery.of(context).platformBrightness == Brightness.dark;
@@ -27,10 +33,12 @@ class _HistoryBottomSheetState extends State<HistoryBottomSheet> {
         const SizedBox(height: 16),
         Expanded(
           child: widget.history.isEmpty
-              ? const Center(
-                  child: Text(
-                    "No items to display",
-                    style: TextStyle(fontSize: 18),
+              ? const SafeArea(
+                  child: Center(
+                    child: Text(
+                      "No items to display",
+                      style: TextStyle(fontSize: 18),
+                    ),
                   ),
                 )
               : ListView.separated(
@@ -84,7 +92,7 @@ class _HistoryBottomSheetState extends State<HistoryBottomSheet> {
                                     : lightThemeCard,
 
                                 child: InkWell(
-                                  onTap: () => Navigator.of(context).pop(item),
+                                  onTap: () => widget.onTapItem?.call(item),
                                   child: Container(
                                     padding: const EdgeInsets.all(16),
                                     child: Column(
@@ -127,8 +135,8 @@ class _HistoryBottomSheetState extends State<HistoryBottomSheet> {
                                                 .map((text) {
                                                   return getEquationText(
                                                     text,
-                                                    fontSize: 16,
-                                                    verticalOffset: -8,
+                                                    superFontSize: 16,
+                                                    superVerticalOffset: -8,
                                                   );
                                                 })
                                                 .toList(),
