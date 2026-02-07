@@ -93,15 +93,34 @@ class CalculatorRepository with ChangeNotifier {
   }
 
   void setCursorFromCharOffset(int offset) {
+    if (offset <= 0) {
+      cursor = 0;
+      notifyListeners();
+      return;
+    }
+
     var count = 0;
 
     for (var i = 0; i < equation.length; i++) {
-      count += equation[i].length;
-      if (offset <= count) {
-        cursor = i + 1;
+      final tokenLength = equation[i].length;
+      final start = count;
+      final end = count + tokenLength;
+
+      if (offset <= start) {
+        cursor = i;
+        notifyListeners();
         return;
       }
+
+      if (offset <= end) {
+        cursor = i + 1;
+        notifyListeners();
+        return;
+      }
+
+      count = end;
     }
+    
     cursor = equation.length;
     notifyListeners();
   }
