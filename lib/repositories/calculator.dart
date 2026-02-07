@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:intl/intl.dart";
 import "package:math_expressions/math_expressions.dart";
 import "package:nxcalculator/models/history_item.dart";
 import "package:shared_preferences/shared_preferences.dart";
@@ -315,8 +316,9 @@ class CalculatorRepository with ChangeNotifier {
       final model = ContextModel();
       final value = RealEvaluator(model).evaluate(expression);
 
-      print("Final Equation: $finalEquation");
-      print("Evaluation: $value");
+      // print("Tokens: $equation");
+      // print("Final Equation: $finalEquation");
+      // print("Evaluation: $value");
 
       if (value.isNaN && printError) {
         error = "Domain Error";
@@ -325,6 +327,8 @@ class CalculatorRepository with ChangeNotifier {
         result = _getFormattedResult(value);
       }
     } catch (e) {
+      // print("Error: $e");
+
       if (printError) {
         result = "";
 
@@ -433,10 +437,11 @@ class CalculatorRepository with ChangeNotifier {
         continue;
       }
 
-      if (current == "+" ||
-          current == "-" ||
-          current == "÷" ||
-          current == "×") {
+      if ((current == "+" ||
+              current == "-" ||
+              current == "÷" ||
+              current == "×") &&
+          chainedFactorialCounter > 1) {
         chainedFactorialCounter--;
       }
 
@@ -453,7 +458,7 @@ class CalculatorRepository with ChangeNotifier {
     }
 
     if (chainedFactorialCounter > 1) {
-      throw const FormatException("Chained factorials not supported");
+      throw const FormatException("Too many factorials");
     }
 
     // Close all unclosed brackets
@@ -542,11 +547,14 @@ class CalculatorRepository with ChangeNotifier {
       return "Infinity";
     }
 
+    final formatter = NumberFormat.decimalPattern(Intl.defaultLocale);
+    formatter.maximumFractionDigits = 9;
+
     if (value.toString().contains(RegExp(r"e[\+\-]"))) {
       final parts = value.toString().split("e");
-      return "${double.parse(parts.first).toStringAsFixed(6)}E${parts.last}";
+      return "${formatter.format(double.parse(parts.first))}E${parts.last}";
     }
 
-    return value.toStringAsFixed(9).replaceFirst(RegExp(r"\.?0+$"), "");
+    return formatter.format(value);
   }
 }
