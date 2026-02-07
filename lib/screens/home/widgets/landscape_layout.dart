@@ -78,12 +78,12 @@ class _LandscapeLayoutState extends State<LandscapeLayout> {
                             builder: (context, repo, child) {
                               return EquationInputField(
                                 shrink: true,
+                                equation: repo.equation,
                                 style: const TextStyle(
                                   letterSpacing: -6,
                                   fontFamily: "LetteraMono",
                                   fontSize: 48,
                                 ),
-                                equation: repo.equation,
                                 onSelectionChanged: (cursorPosition) {
                                   repo.setCursorFromCharOffset(cursorPosition);
                                 },

@@ -22,7 +22,6 @@ class EquationInputField extends StatelessWidget {
       scrollDirection: Axis.horizontal,
       child: SelectableText.rich(
         maxLines: 1,
-        autofocus: true,
         showCursor: true,
         scrollPhysics: const NeverScrollableScrollPhysics(),
         textAlign: TextAlign.end,
@@ -31,8 +30,11 @@ class EquationInputField extends StatelessWidget {
           fontSize: style?.fontSize,
         ),
         onSelectionChanged: (selection, cause) {
-          if (selection.start == selection.end) {
-            onSelectionChanged?.call(selection.start);
+          if (cause == SelectionChangedCause.drag ||
+              cause == SelectionChangedCause.tap) {
+            if (selection.start == selection.end) {
+              onSelectionChanged?.call(selection.start);
+            }
           }
         },
         TextSpan(
