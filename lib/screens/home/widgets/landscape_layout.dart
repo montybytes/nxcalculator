@@ -1,7 +1,8 @@
 import "package:flutter/material.dart";
+import "package:nxcalculator/models/history_item.dart";
 import "package:nxcalculator/repositories/calculator.dart";
 import "package:nxcalculator/screens/home/widgets/equation_input_field.dart";
-import "package:nxcalculator/screens/home/widgets/result_text_field.dart";
+import "package:nxcalculator/utils/strings.dart";
 import "package:nxcalculator/widgets/dynamic_appbar.dart";
 import "package:nxcalculator/widgets/history_listview.dart";
 import "package:nxcalculator/widgets/landscape_keypad.dart";
@@ -17,6 +18,14 @@ class LandscapeLayout extends StatefulWidget {
 class _LandscapeLayoutState extends State<LandscapeLayout> {
   CalculatorRepository get _repo => context.read<CalculatorRepository>();
 
+  final focusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    focusNode.requestFocus();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -31,25 +40,28 @@ class _LandscapeLayoutState extends State<LandscapeLayout> {
               children: [
                 const DynamicAppbar(),
                 Expanded(
-                  child: Consumer<CalculatorRepository>(
-                    builder: (context, repo, child) {
-                      return FutureBuilder(
-                        future: _repo.loadHistory(),
-                        builder: (context, asyncSnapshot) {
+                  child: FutureBuilder(
+                    future: _repo.loadHistory(),
+                    builder: (context, asyncSnapshot) {
+                      return Consumer<CalculatorRepository>(
+                        builder: (context, repo, child) {
                           return HistoryListview(
-                            history: _repo.history,
+                            history: repo.history,
                             onTapItem: (item) {
-                              _repo.clear();
+                              repo.clear();
                               if (item.result.contains("E")) {
-                                _repo.insertToken(item.result);
+                                if (item.result.startsWith("-")) {
+                                  repo.addOperation("-");
+                                  repo.insertToken(item.result.substring(1));
+                                } else {
+                                  repo.insertToken(item.result);
+                                }
                               } else {
-                                _repo.addDigit(item.result);
+                                repo.addDigit(item.result);
                               }
                             },
-                            onDelete: (index) async {
-                              _repo.history.removeAt(index);
-                              await _repo.saveHistory(checkLast: false);
-                            },
+                            onDelete: (index) async =>
+                                await repo.removeFromHistory(index),
                           );
                         },
                       );
@@ -70,19 +82,20 @@ class _LandscapeLayoutState extends State<LandscapeLayout> {
                 children: [
                   Flexible(
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Flexible(
                           flex: 3,
                           child: Consumer<CalculatorRepository>(
                             builder: (context, repo, child) {
                               return EquationInputField(
-                                shrink: true,
                                 equation: repo.equation,
+                                maxFontSize: 48,
+                                minFontSize: 48,
+                                focusNode: focusNode,
                                 style: const TextStyle(
-                                  letterSpacing: -6,
-                                  fontFamily: "LetteraMono",
-                                  fontSize: 48,
+                                  height: 1,
+                                  fontFamily: "Inter",
                                 ),
                                 onSelectionChanged: (cursorPosition) {
                                   repo.setCursorFromCharOffset(cursorPosition);
@@ -91,19 +104,28 @@ class _LandscapeLayoutState extends State<LandscapeLayout> {
                             },
                           ),
                         ),
+                        const Spacer(),
                         Flexible(
                           flex: 2,
                           child: Consumer<CalculatorRepository>(
                             builder: (context, repo, child) {
-                              return ResultTextField(
-                                result: repo.result,
-                                error: repo.error,
+                              final text = repo.result == "" && repo.error != ""
+                                  ? repo.error
+                                  : getFormattedResult(
+                                      repo.result,
+                                      maxIntegerDigits: 13,
+                                      maxFractionDigits: 18,
+                                    );
+
+                              return SelectableText(
+                                text,
+                                maxLines: 1,
+                                textAlign: TextAlign.end,
                                 style: TextStyle(
                                   height: 1,
-                                  fontSize: repo.result.length >= 12 ? 36 : 40,
-                                  letterSpacing: -6,
-                                  color: Colors.grey[700],
-                                  fontFamily: "LetteraMono",
+                                  fontFamily: "Inter",
+                                  fontSize: 38,
+                                  color: Colors.grey[600],
                                 ),
                               );
                             },
@@ -167,7 +189,12 @@ class _LandscapeLayoutState extends State<LandscapeLayout> {
                         onEqualPress: () async {
                           _repo.evaluate(printError: true);
 
-                          if (await _repo.saveHistory()) {
+                          final item = HistoryItem(
+                            result: getFormattedResult(_repo.result),
+                            equation: [..._repo.equation],
+                          );
+
+                          if (await _repo.saveHistory(item)) {
                             _repo.clear();
                             if (_repo.history.first.result.contains("E")) {
                               _repo.insertToken(_repo.history.first.result);

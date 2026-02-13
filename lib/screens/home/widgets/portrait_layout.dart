@@ -1,9 +1,9 @@
 import "package:flutter/material.dart";
 import "package:nxcalculator/models/history_item.dart";
 import "package:nxcalculator/repositories/calculator.dart";
-import "package:nxcalculator/screens/home/widgets/equation_input_field.dart";
-import "package:nxcalculator/screens/home/widgets/result_text_field.dart";
 import "package:nxcalculator/theme/constants.dart";
+import "package:nxcalculator/screens/home/widgets/equation_input_field.dart";
+import "package:nxcalculator/utils/strings.dart";
 import "package:nxcalculator/widgets/dynamic_appbar.dart";
 import "package:nxcalculator/widgets/history_listview.dart";
 import "package:nxcalculator/widgets/portrait_keypad.dart";
@@ -23,6 +23,14 @@ class _PortraitLayoutState extends State<PortraitLayout> {
 
   bool get _isDark =>
       MediaQuery.of(context).platformBrightness == Brightness.dark;
+
+  final focusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    focusNode.requestFocus();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,40 +77,58 @@ class _PortraitLayoutState extends State<PortraitLayout> {
                 flex: 3,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Flexible(
                       flex: 3,
                       child: Consumer<CalculatorRepository>(
                         builder: (context, repo, child) {
-                          return EquationInputField(
-                            shrink: _isExtended,
-                            equation: repo.equation,
-                            style: TextStyle(
-                              letterSpacing: -8,
-                              fontFamily: "LetteraMono",
-                              fontSize: _isExtended ? 68 : 80,
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            child: EquationInputField(
+                              clip: false,
+                              maxFontSize: 72,
+                              minFontSize: 38,
+                              focusNode: focusNode,
+                              style: const TextStyle(
+                                height: 1,
+                                fontFamily: "Inter",
+                              ),
+                              equation: repo.equation,
+                              onSelectionChanged: (cursorPosition) {
+                                repo.setCursorFromCharOffset(cursorPosition);
+                              },
                             ),
-                            onSelectionChanged: (cursorPosition) {
-                              repo.setCursorFromCharOffset(cursorPosition);
-                            },
                           );
                         },
                       ),
                     ),
+                    const SizedBox(height: 24),
                     Flexible(
                       flex: 3,
                       child: Consumer<CalculatorRepository>(
                         builder: (context, repo, child) {
-                          return ResultTextField(
-                            result: repo.result,
-                            error: repo.error,
-                            style: TextStyle(
-                              height: 1,
-                              fontSize: repo.result.length >= 12 ? 52 : 56,
-                              letterSpacing: -6,
-                              color: Colors.grey[700],
-                              fontFamily: "LetteraMono",
+                          final text = repo.result == "" && repo.error != ""
+                              ? repo.error
+                              : getFormattedResult(
+                                  repo.result,
+                                  maxIntegerDigits: 13,
+                                  maxFractionDigits: 13,
+                                );
+
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            child: SelectableText(
+                              text,
+                              maxLines: 1,
+                              textAlign: TextAlign.end,
+                              style: TextStyle(
+                                height: 1,
+
+                                fontFamily: "Inter",
+                                fontSize: 38,
+                                color: Colors.grey[600],
+                              ),
                             ),
                           );
                         },
@@ -172,12 +198,24 @@ class _PortraitLayoutState extends State<PortraitLayout> {
                         onEqualPress: () async {
                           _repo.evaluate(printError: true);
 
-                          if (await _repo.saveHistory()) {
+                          final item = HistoryItem(
+                            result: getFormattedResult(_repo.result),
+                            equation: [..._repo.equation],
+                          );
+
+                          if (await _repo.saveHistory(item)) {
                             _repo.clear();
-                            if (_repo.history.first.result.contains("E")) {
-                              _repo.insertToken(_repo.history.first.result);
+
+                            final result = _repo.history.first.result;
+                            if (result.contains("E")) {
+                              if (result.startsWith("-")) {
+                                _repo.addOperation("-");
+                                _repo.insertToken(result.substring(1));
+                              } else {
+                                _repo.insertToken(result);
+                              }
                             } else {
-                              _repo.addDigit(_repo.history.first.result);
+                              _repo.addDigit(result);
                             }
                           }
                         },
@@ -206,10 +244,7 @@ class _PortraitLayoutState extends State<PortraitLayout> {
             return HistoryListview(
               history: _repo.history,
               onTapItem: (item) => Navigator.of(context).pop(item),
-              onDelete: (index) async {
-                _repo.history.removeAt(index);
-                await _repo.saveHistory(checkLast: false);
-              },
+              onDelete: (index) async => await _repo.removeFromHistory(index),
             );
           },
         );
@@ -219,7 +254,12 @@ class _PortraitLayoutState extends State<PortraitLayout> {
     if (item != null) {
       _repo.clear();
       if (item.result.contains("E")) {
-        _repo.insertToken(item.result);
+        if (item.result.startsWith("-")) {
+          _repo.addOperation("-");
+          _repo.insertToken(item.result.substring(1));
+        } else {
+          _repo.insertToken(item.result);
+        }
       } else {
         _repo.addDigit(item.result);
       }
