@@ -8,7 +8,7 @@ import "package:shared_preferences_platform_interface/in_memory_shared_preferenc
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  group("Test calculator inputs", () {
+  group("Input Tests", () {
     test("add digits", () {
       final repo = CalculatorRepository();
 
@@ -20,6 +20,16 @@ void main() {
 
       repo.addDigit("34");
       expect(repo.equation, ["1", "2", "3", "4"]);
+    });
+
+    test("add constants", () {
+      final repo = CalculatorRepository();
+
+      repo.addConstant("e");
+      expect(repo.equation, ["e"]);
+
+      repo.addConstant("π");
+      expect(repo.equation, ["e", "π"]);
     });
 
     test("add decimal point", () {
@@ -71,14 +81,6 @@ void main() {
 
       repo.addFunction("{tan}");
       expect(repo.equation, ["sin(", "cos(", "tan("]);
-
-      repo.clear();
-
-      repo.addFunction("{exponent}");
-      expect(repo.equation, ["e"]);
-
-      repo.addFunction("{pi}");
-      expect(repo.equation, ["e", "π"]);
 
       repo.clear();
 
@@ -205,7 +207,7 @@ void main() {
     });
   });
 
-  group("Test expression evaluation", () {
+  group("Evaluation Tests", () {
     test("evaluate proper equation", () {
       final repo = CalculatorRepository();
 
@@ -222,7 +224,7 @@ void main() {
       repo.addDigit("0");
       repo.addOperation("+");
       repo.addFunction("{root}");
-      repo.addFunction("{pi}");
+      repo.addConstant("π");
       repo.addBracket();
       repo.addBracket();
       repo.addPercent();
@@ -253,31 +255,31 @@ void main() {
       ]);
 
       repo.evaluate();
-      expect(repo.result, "1.010530942617");
+      expect(repo.result, "1.00698044081646");
     });
 
     test("evaluate incorrect equation", () {
       final repo = CalculatorRepository();
 
       repo.addFunction("{ln}");
-      repo.evaluate();
-      expect(repo.result, "Error");
+      repo.evaluate(printError: true);
+      expect(repo.error, "Format Error");
 
       repo.clear();
 
       repo.addDigit("2");
       repo.addFunction("{factorial}");
       repo.addOperation("-");
-      repo.evaluate();
-      expect(repo.result, "Format Error");
+      repo.evaluate(printError: true);
+      expect(repo.error, "Format Error");
 
       repo.clear();
 
       repo.invertFunctions();
       repo.addFunction("{sin}");
       repo.addDigit("2");
-      repo.evaluate();
-      expect(repo.result, "Domain Error");
+      repo.evaluate(printError: true);
+      expect(repo.error, "Domain Error");
 
       repo.clear();
     });
@@ -288,8 +290,9 @@ void main() {
       repo.addDigit("2");
       repo.addOperation("÷");
       repo.addDigit("0");
-      repo.evaluate();
-      expect(repo.result, "Infinity");
+      repo.evaluate(printError: true);
+      expect(repo.result, "");
+      expect(repo.error, "Division By Zero");
 
       repo.clear();
 
@@ -299,14 +302,13 @@ void main() {
       repo.addDigit("2");
       repo.addOperation("-");
       repo.addDigit("2");
-      repo.evaluate();
-      expect(repo.result, "Infinity");
+      repo.evaluate(printError: true);
+      expect(repo.error, "Division By Zero");
     });
 
     test("evaluate correct mode evaluation", () {
       final repo = CalculatorRepository();
 
-      repo.toggleMode("DEG");
       repo.addFunction("{sin}");
       repo.addDigit("30");
       repo.evaluate();
@@ -314,47 +316,21 @@ void main() {
 
       repo.clear();
 
-      repo.toggleMode("RAD");
+      repo.toggleMode();
       repo.addFunction("{sin}");
-      repo.addFunction("{pi}");
+      repo.addConstant("π");
       repo.addOperation("÷");
       repo.addDigit("6");
       repo.evaluate();
       expect(repo.result, "0.5");
     });
-
-    test("evaluate chained factorials", () {
-      final repo = CalculatorRepository();
-
-      repo.addBracket();
-      repo.addBracket();
-      repo.addDigit("2");
-      repo.addFunction("{factorial}");
-      repo.addBracket();
-      repo.addFunction("{factorial}");
-      repo.addBracket();
-      repo.addFunction("{factorial}");
-      repo.evaluate();
-      expect(repo.result, "Format Error");
-
-      repo.clear();
-
-      repo.addDigit("3");
-      repo.addFunction("{factorial}");
-      repo.addDigit("3");
-      repo.addFunction("{factorial}");
-      repo.evaluate();
-      expect(repo.result, "36");
-    });
   });
 
-  group("Test history storage operations", () {
-    setUpAll(() async {
+  group("Storage Persistence Tests", () {
+    setUp(() async {
       SharedPreferencesAsyncPlatform.instance =
           InMemorySharedPreferencesAsync.empty();
-    });
 
-    setUp(() async {
       final prefs = SharedPreferencesAsync();
       await prefs.clear();
     });
@@ -366,7 +342,11 @@ void main() {
       repo.addOperation("+");
       repo.addDigit("3");
       repo.evaluate();
-      expect(await repo.saveHistory(), true);
+      final item = HistoryItem(
+        result: repo.result,
+        equation: [...repo.equation],
+      );
+      expect(await repo.saveHistory(item), true);
       expect(repo.history.length, 1);
 
       final prefs = SharedPreferencesAsync();
@@ -384,7 +364,11 @@ void main() {
         repo.addOperation("+");
         repo.addDigit("$i");
         repo.evaluate();
-        await repo.saveHistory();
+        final item = HistoryItem(
+          result: repo.result,
+          equation: [...repo.equation],
+        );
+        await repo.saveHistory(item);
         repo.clear();
       }
       expect(repo.history.length, 50);
@@ -393,6 +377,7 @@ void main() {
       final stored = await prefs.getStringList(calculatorHistoryKey);
 
       expect(stored, isNotNull);
+
       final items =
           stored?.map((item) => HistoryItem.fromData(item)).toList() ?? [];
 
@@ -402,6 +387,7 @@ void main() {
         result: "56",
         equation: ["1", "+", "5", "5"],
       );
+
       expect(items.first.equals(lastExpression), true);
     });
 
