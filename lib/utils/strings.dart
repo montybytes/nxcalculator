@@ -1,5 +1,6 @@
 import "package:decimal/decimal.dart";
 import "package:decimal/intl.dart";
+import "package:flutter/foundation.dart";
 import "package:intl/intl.dart";
 
 String getFormattedResult(
@@ -17,6 +18,7 @@ String getFormattedResult(
   late final DecimalFormatter formatter;
 
   final integerLength = number.abs().truncate().toString().length;
+  final locale = PlatformDispatcher.instance.locale.toString();
 
   if (integerLength > maxIntegerDigits) {
     final isNegative = number < Decimal.zero;
@@ -41,11 +43,9 @@ String getFormattedResult(
         .clamp(0, maxFractionDigits);
 
     final sign = isNegative ? "-" : "";
-    final mantissa = Decimal.parse(
-      "${digits[0]}.${digits.substring(1)}",
-    );
+    final mantissa = Decimal.parse("${digits[0]}.${digits.substring(1)}");
 
-    format = (NumberFormat.decimalPattern(Intl.defaultLocale));
+    format = (NumberFormat.decimalPattern(locale));
     format.maximumFractionDigits = fractionDigits;
     format.minimumFractionDigits = 0;
     formatter = DecimalFormatter(format);
@@ -58,7 +58,7 @@ String getFormattedResult(
     maxFractionDigits,
   );
 
-  format = NumberFormat.decimalPattern(Intl.defaultLocale);
+  format = NumberFormat.decimalPattern(locale);
   format.maximumFractionDigits = fractionDigits;
   format.minimumFractionDigits = 0;
   formatter = DecimalFormatter(format);
