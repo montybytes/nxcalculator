@@ -1,6 +1,8 @@
+import "package:decimal/decimal.dart";
 import "package:flutter/material.dart";
-import "package:intl/intl.dart";
-import "package:math_expressions/math_expressions.dart";
+import "package:nxcalculator/backend/exception.dart";
+import "package:nxcalculator/backend/expression.dart";
+import "package:nxcalculator/backend/nodes.dart";
 import "package:nxcalculator/models/history_item.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
@@ -40,7 +42,7 @@ class CalculatorRepository with ChangeNotifier {
    * Helper Functions
    */
 
-  bool _isNumber(String s) => RegExp(r"(\d+)(\.?\d+)?").hasMatch(s);
+  bool _isNumber(String s) => Decimal.tryParse(s) != null;
 
   bool _isConstant(String s) => s == "π" || s == "e";
 
@@ -48,15 +50,10 @@ class CalculatorRepository with ChangeNotifier {
       s == "+" || s == "-" || s == "÷" || s == "×" || s == "^";
 
   bool _isImpliedValue(String s) =>
-      _isNumber(s) ||
-      _isConstant(s) ||
-      s == "%" ||
-      s == "!" ||
-      s == ")" ||
-      s == "^2";
+      _isNumber(s) || _isConstant(s) || s == "!" || s == ")" || s == "^2";
 
   bool _isLeadingValue(String s) =>
-      _isNumber(s) || _isConstant(s) || s == "(" || s.endsWith("(");
+      _isNumber(s) || _isConstant(s) || s.endsWith("(");
 
   bool _isPureNumberExpression() {
     var hasDecimal = false;
@@ -78,14 +75,20 @@ class CalculatorRepository with ChangeNotifier {
   }
 
   void insertToken(String token) {
-    equation.insert(cursor, token);
-    cursor++;
+    if (token.startsWith("-") && token.length > 1) {
+      equation.insert(cursor, "-");
+      equation.insert(cursor, token.substring(1));
+      cursor += 2;
+    } else {
+      equation.insert(cursor, token);
+      cursor++;
 
-    if (token.endsWith("(")) {
-      _openBrackets++;
-    }
-    if (token == ")") {
-      _openBrackets--;
+      if (token.endsWith("(")) {
+        _openBrackets++;
+      }
+      if (token == ")") {
+        _openBrackets--;
+      }
     }
 
     evaluate();
@@ -120,7 +123,7 @@ class CalculatorRepository with ChangeNotifier {
 
       count = end;
     }
-    
+
     cursor = equation.length;
     notifyListeners();
   }
@@ -186,7 +189,7 @@ class CalculatorRepository with ChangeNotifier {
       return;
     }
 
-    if (_isImpliedValue(prev)) {
+    if (_isImpliedValue(prev) || prev == "%") {
       insertToken(operation);
       return;
     }
@@ -225,11 +228,7 @@ class CalculatorRepository with ChangeNotifier {
           return;
         }
 
-        final prev = equation[cursor - 1];
-
-        if (_isNumber(prev) || _isConstant(prev) || prev == ")") {
-          insertToken("!");
-        }
+        insertToken("!");
       case "{root}":
         if (inverted) {
           if (cursor == 0) {
@@ -257,7 +256,7 @@ class CalculatorRepository with ChangeNotifier {
     final canOpen =
         _openBrackets == 0 ||
         equation.isEmpty ||
-        equation[cursor - 1].contains(RegExp(r"[+\-×÷(]"));
+        equation[cursor - 1].contains(RegExp(r"[\+\-\×\÷\(]"));
 
     insertToken(canOpen ? "(" : ")");
   }
@@ -322,40 +321,36 @@ class CalculatorRepository with ChangeNotifier {
   }
 
   void evaluate({bool printError = false}) {
+    result = "";
+    error = "";
+
     if (equation.isEmpty) {
       return;
     }
 
     try {
-      final finalEquation = _convertTrigForMode(_getFormattedEquation());
-
-      final parser = GrammarParser();
-      final expression = parser.parse(finalEquation);
-
-      final model = ContextModel();
-      final value = RealEvaluator(model).evaluate(expression);
-
-      // print("Tokens: $equation");
+      // print("Pre Equation: $equation");
+      final finalEquation = _getFormattedEquation(equation);
       // print("Final Equation: $finalEquation");
-      // print("Evaluation: $value");
 
-      if (value.isNaN && printError) {
-        error = "Domain Error";
-        result = "";
-      } else {
-        result = _getFormattedResult(value);
+      final engine = MathEngine();
+      final expression = engine.parse(finalEquation);
+      final mathMode = mode == "DEG" ? MathMode.DEGREES : MathMode.RADIANS;
+
+      // print(expression.printAST());
+      result = engine.evaluate(expression, mode: mathMode).toString();
+      // print("Evaluation: $result");
+    } on CalculatorException catch (e) {
+      if (printError) {
+        error = e.message;
+      }
+    } on FormatException catch (_) {
+      if (printError) {
+        error = "Format Error";
       }
     } catch (e) {
-      // print("Error: $e");
-
       if (printError) {
-        result = "";
-
-        if (equation.isNotEmpty && e is FormatException) {
-          error = "Format Error";
-        } else {
-          error = "Error";
-        }
+        error = "Error";
       }
     } finally {
       notifyListeners();
@@ -366,9 +361,7 @@ class CalculatorRepository with ChangeNotifier {
    * Local Storage Functions
    */
 
-  Future<bool> saveHistory({bool checkLast = true}) async {
-    final item = HistoryItem(result: result, equation: [...equation]);
-
+  Future<bool> saveHistory(HistoryItem item, {bool checkLast = true}) async {
     if (checkLast) {
       if (history.isNotEmpty && history.first.equals(item)) {
         return false;
@@ -397,9 +390,7 @@ class CalculatorRepository with ChangeNotifier {
     final data = history.map((item) => item.serialize()).toList();
 
     await prefs.setStringList(calculatorHistoryKey, data);
-
-    await loadHistory();
-
+    notifyListeners();
     return true;
   }
 
@@ -416,6 +407,17 @@ class CalculatorRepository with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> removeFromHistory(int index) async {
+    history.removeAt(index);
+
+    final prefs = SharedPreferencesAsync();
+    final data = history.map((item) => item.serialize()).toList();
+
+    await prefs.setStringList(calculatorHistoryKey, data);
+    await loadHistory();
+    notifyListeners();
+  }
+
   Future<void> clearHistory() async {
     final prefs = SharedPreferencesAsync();
     await prefs.remove(calculatorHistoryKey);
@@ -425,25 +427,54 @@ class CalculatorRepository with ChangeNotifier {
   }
 
   /*
-   * Equation & Result Formatting Helpers
+   *  Formatting Helpers
    */
 
-  String _getFormattedEquation() {
+  List<String> _getFormattedEquation(List<String> equation) {
     final buffer = <String>[];
-    var chainedFactorialCounter = 0;
 
     for (var i = 0; i < equation.length; i++) {
       final current = equation[i];
 
-      if (current.contains("E")) {
-        final parts = current.split("E");
-        buffer.add("${parts.first}×10^(${parts.last})");
-      } else {
-        buffer.add(current);
-      }
+      switch (current) {
+        case "÷":
+          buffer.add("/");
+        case "×":
+          buffer.add("*");
+        case "π":
+          buffer.add("pi");
+        case "^2":
+          buffer.add("^");
+          buffer.add("2");
+        case "10^(":
+          buffer.add("10");
+          buffer.add("^");
+          buffer.add("(");
+        default:
+          if (current.contains("E") && current.startsWith("-")) {
+            buffer.add("-");
+            buffer.add(current.substring(1));
+          } else if (_isNumber(current) || current == ".") {
+            final numberBuffer = StringBuffer();
 
-      if (current == "!") {
-        chainedFactorialCounter++;
+            var j = i;
+
+            while (j < equation.length &&
+                (_isNumber(equation[j]) || equation[j] == ".")) {
+              numberBuffer.write(equation[j]);
+              j++;
+            }
+
+            buffer.add(numberBuffer.toString());
+            i = j - 1;
+          } else {
+            if (current.endsWith("(") && current != "(") {
+              buffer.add(current.replaceAll("(", ""));
+              buffer.add("(");
+            } else {
+              buffer.add(current);
+            }
+          }
       }
 
       if (i == equation.length - 1) {
@@ -456,18 +487,6 @@ class CalculatorRepository with ChangeNotifier {
         continue;
       }
 
-      if ((current == "+" ||
-              current == "-" ||
-              current == "÷" ||
-              current == "×") &&
-          chainedFactorialCounter > 1) {
-        chainedFactorialCounter--;
-      }
-
-      if (current == "!" && (_isNumber(next) || _isConstant(next))) {
-        chainedFactorialCounter--;
-      }
-
       final needsMultiplication =
           _isImpliedValue(current) && _isLeadingValue(next);
 
@@ -476,104 +495,11 @@ class CalculatorRepository with ChangeNotifier {
       }
     }
 
-    if (chainedFactorialCounter > 1) {
-      throw const FormatException("Too many factorials");
-    }
-
     // Close all unclosed brackets
     if (_openBrackets != 0) {
       buffer.addAll(List.filled(_openBrackets, ")"));
     }
 
-    return buffer
-        .join()
-        .replaceAll("×", "*")
-        .replaceAll("÷", "/")
-        .replaceAll("π", "pi")
-        .replaceAll("%", "/100")
-        .replaceAll("exp(", "e(")
-        .replaceAll("log(", "log(10,");
-  }
-
-  String _convertTrigForMode(String equation) {
-    if (mode == "RAD") {
-      return equation;
-    }
-
-    String convertRecursively(String expr) {
-      final buffer = StringBuffer();
-
-      bool isInverseTrig(String fn) =>
-          fn == "arcsin" || fn == "arccos" || fn == "arctan";
-
-      String? matchTrig(String expr, int index) {
-        const functions = ["arcsin", "arccos", "arctan", "sin", "cos", "tan"];
-
-        for (final fn in functions) {
-          if (expr.startsWith(fn, index)) {
-            return fn;
-          }
-        }
-        return null;
-      }
-
-      var i = 0;
-      while (i < expr.length) {
-        final trigMatch = matchTrig(expr, i);
-
-        if (trigMatch != null) {
-          final fn = trigMatch;
-          i += fn.length;
-
-          final start = i + 1;
-          var depth = 1;
-          var j = start;
-
-          while (j < expr.length && depth > 0) {
-            switch (expr[j]) {
-              case "(":
-                depth++;
-              case ")":
-                depth--;
-            }
-            j++;
-          }
-
-          final inner = expr.substring(start, j - 1);
-          final convertedInner = convertRecursively(inner);
-
-          if (isInverseTrig(fn)) {
-            buffer.write("($fn($convertedInner) * 180 / pi)");
-          } else {
-            buffer.write("$fn(($convertedInner) * pi / 180)");
-          }
-
-          i = j;
-        } else {
-          buffer.write(expr[i]);
-          i++;
-        }
-      }
-
-      return buffer.toString();
-    }
-
-    return convertRecursively(equation);
-  }
-
-  String _getFormattedResult(num value) {
-    if (value.isInfinite) {
-      return "Infinity";
-    }
-
-    final formatter = NumberFormat.decimalPattern(Intl.defaultLocale);
-    formatter.maximumFractionDigits = 9;
-
-    if (value.toString().contains(RegExp(r"e[\+\-]"))) {
-      final parts = value.toString().split("e");
-      return "${formatter.format(double.parse(parts.first))}E${parts.last}";
-    }
-
-    return formatter.format(value);
+    return buffer;
   }
 }

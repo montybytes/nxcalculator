@@ -12,7 +12,6 @@ final darkTheme = ThemeData(
   ),
   textSelectionTheme: textSelectionDefaultTheme,
   textTheme: ThemeData().textTheme.apply(
-    fontFamily: defaultFontFamily,
     bodyColor: darkThemeText,
     displayColor: darkThemeText,
   ),

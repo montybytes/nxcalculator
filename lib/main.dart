@@ -4,6 +4,8 @@ import "package:nxcalculator/screens/home/home.dart";
 import "package:nxcalculator/theme/dark.dart";
 import "package:nxcalculator/theme/light.dart";
 
+final rootNavigatorKey = GlobalKey<NavigatorState>();
+
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   Intl.defaultLocale = Intl.systemLocale;
@@ -16,6 +18,7 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: rootNavigatorKey,
       title: "Flutter Demo",
       theme: lightTheme,
       darkTheme: darkTheme,
