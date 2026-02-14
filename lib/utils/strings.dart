@@ -43,7 +43,9 @@ String getFormattedResult(
         .clamp(0, maxFractionDigits);
 
     final sign = isNegative ? "-" : "";
-    final mantissa = Decimal.parse("${digits[0]}.${digits.substring(1)}");
+    final mantissa = Decimal.parse(
+      "${digits[0]}.${digits.substring(1, fractionDigits)}",
+    );
 
     format = (NumberFormat.decimalPattern(locale));
     format.maximumFractionDigits = fractionDigits;
