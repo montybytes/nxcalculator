@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:nxcalculator/main.dart";
 import "package:nxcalculator/models/history_item.dart";
 import "package:nxcalculator/repositories/calculator.dart";
 import "package:nxcalculator/theme/constants.dart";
@@ -30,6 +31,14 @@ class _PortraitLayoutState extends State<PortraitLayout> {
   void initState() {
     super.initState();
     focusNode.requestFocus();
+  }
+
+  @override
+  void dispose() {
+    if (rootNavigatorKey.currentState?.canPop() ?? false) {
+      rootNavigatorKey.currentState?.pop();
+    }
+    super.dispose();
   }
 
   @override

@@ -5,8 +5,8 @@ import "package:nxcalculator/theme/constants.dart";
 
 InlineSpan getEquationText(
   String text, {
-  required double superFontSize,
   required double superVerticalOffset,
+  TextStyle? superStyle,
 }) {
   if (text == "^2") {
     return WidgetSpan(
@@ -16,7 +16,7 @@ InlineSpan getEquationText(
         child: Text(
           text.replaceAll("^", ""),
           textScaler: const TextScaler.linear(0.7),
-          style: TextStyle(fontSize: superFontSize),
+          style: superStyle,
         ),
       ),
     );

@@ -103,17 +103,13 @@ class _HistoryListviewState extends State<HistoryListview> {
                                           widget.history[index].result,
                                           textAlign: TextAlign.end,
                                           maxLines: 1,
-                                          style: const TextStyle(
-                                            fontSize: 32,
-                                            fontFamily: "LetteraMono",
-                                            letterSpacing: -4,
-                                          ),
+                                          style: const TextStyle(fontSize: 32),
                                           strutStyle: const StrutStyle(
                                             forceStrutHeight: true,
                                             fontSize: 32,
                                           ),
                                         ),
-                                        const SizedBox(height: 4),
+                                        const SizedBox(height: 8),
                                         Text.rich(
                                           maxLines: 1,
                                           textAlign: TextAlign.end,
@@ -124,8 +120,6 @@ class _HistoryListviewState extends State<HistoryListview> {
 
                                           TextSpan(
                                             style: const TextStyle(
-                                              fontFamily: "LetteraMono",
-                                              letterSpacing: -2,
                                               fontSize: 20,
                                               color: Colors.grey,
                                             ),
@@ -135,8 +129,11 @@ class _HistoryListviewState extends State<HistoryListview> {
                                                 .map((text) {
                                                   return getEquationText(
                                                     text,
-                                                    superFontSize: 16,
-                                                    superVerticalOffset: -8,
+                                                    superVerticalOffset: -4,
+                                                    superStyle: const TextStyle(
+                                                      fontSize: 16,
+                                                      color: Colors.grey,
+                                                    ),
                                                   );
                                                 })
                                                 .toList(),

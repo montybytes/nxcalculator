@@ -141,7 +141,7 @@ class EquationInputField extends StatelessWidget {
         children: equation.map((token) {
           return getEquationText(
             token,
-            superFontSize: superFontSize,
+            superStyle: TextStyle(fontSize: superFontSize),
             superVerticalOffset: superVerticalOffset,
           );
         }).toList(),
