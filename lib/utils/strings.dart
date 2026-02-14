@@ -62,5 +62,7 @@ String getFormattedResult(
   format.maximumFractionDigits = fractionDigits;
   format.minimumFractionDigits = 0;
   formatter = DecimalFormatter(format);
-  return formatter.format(number);
+  return formatter.format(
+    Decimal.parse(number.toStringAsFixed(fractionDigits)),
+  );
 }

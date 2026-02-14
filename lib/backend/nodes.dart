@@ -63,7 +63,50 @@ class UnaryNode extends Node {
         return -x;
 
       case UnaryNodeType.EXPONENTIAL:
-        return _toDecimal(Math.exp(_toDouble(x)));
+        final e = Math.e;
+
+        final digitCountEstimate =
+            x * _toDecimal(Math.log(e.abs().toDouble()) / Math.ln10);
+
+        if (digitCountEstimate > Decimal.fromInt(130)) {
+          throw CalculatorException("Can't calculate");
+        }
+
+        final exp = x.toBigInt();
+
+        if (exp == BigInt.zero) {
+          return Decimal.one;
+        }
+
+        if (x == Decimal.fromBigInt(exp)) {
+          var result = Decimal.one;
+
+          var current = _toDecimal(e);
+          var ex = exp.abs();
+
+          while (ex > BigInt.zero) {
+            if (ex.isOdd) {
+              result *= current;
+            }
+            current *= current;
+            ex >>= 1;
+          }
+
+          if (exp.isNegative) {
+            return (Decimal.one / result).toDecimal(
+              scaleOnInfinitePrecision: 28,
+            );
+          }
+          return result;
+        }
+
+        final result = Math.pow(e, x.toDouble()).toDouble();
+
+        if (result.isInfinite) {
+          throw CalculatorException("Can't calculate");
+        }
+
+        return _toDecimal(result);
 
       case UnaryNodeType.ROOT:
         if (x < Decimal.zero) {
@@ -139,7 +182,7 @@ class UnaryNode extends Node {
           return Decimal.one;
         }
 
-        if (x > Decimal.fromInt(3999)) {
+        if (x > Decimal.fromInt(2999)) {
           throw CalculatorException("Factorial too large");
         }
 
@@ -211,6 +254,13 @@ class BinaryNode extends Node {
 
     switch (type) {
       case BinaryNodeType.POWER:
+        final digitCountEstimate =
+            r * _toDecimal(Math.log(l.abs().toDouble()) / Math.ln10);
+
+        if (digitCountEstimate > Decimal.fromInt(20000)) {
+          throw CalculatorException("Can't calculate");
+        }
+
         if (l.toDouble() == Math.e) {
           return _toDecimal(Math.pow(Math.e, r.toDouble()).toDouble());
         }
@@ -218,10 +268,21 @@ class BinaryNode extends Node {
         final exp = r.toBigInt();
 
         if (r == Decimal.fromBigInt(exp)) {
+          if (exp == BigInt.zero) {
+            return Decimal.one;
+          }
+
           var result = Decimal.one;
 
-          for (var i = BigInt.zero; i < exp.abs(); i += BigInt.one) {
-            result *= l;
+          var current = l;
+          var e = exp.abs();
+
+          while (e > BigInt.zero) {
+            if (e.isOdd) {
+              result *= current;
+            }
+            current *= current;
+            e >>= 1;
           }
 
           if (exp.isNegative) {
@@ -229,10 +290,16 @@ class BinaryNode extends Node {
               scaleOnInfinitePrecision: 28,
             );
           }
-
           return result;
         }
-        return _toDecimal(Math.pow(_toDouble(l), _toDouble(r)).toDouble());
+
+        final result = Math.pow(_toDouble(l), _toDouble(r)).toDouble();
+
+        if (result.isInfinite) {
+          throw CalculatorException("Can't calculate");
+        }
+
+        return _toDecimal(result);
 
       case BinaryNodeType.ADDITION:
         return l + r;

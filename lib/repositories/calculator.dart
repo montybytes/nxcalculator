@@ -337,6 +337,7 @@ class CalculatorRepository with ChangeNotifier {
       final expression = engine.parse(finalEquation);
       final mathMode = mode == "DEG" ? MathMode.DEGREES : MathMode.RADIANS;
 
+      // print(expression.printAST());
       result = engine.evaluate(expression, mode: mathMode).toString();
       // print("Evaluation: $result");
     } on CalculatorException catch (e) {
