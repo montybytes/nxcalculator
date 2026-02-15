@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:nxcalculator/repositories/calculator.dart";
 import "package:nxcalculator/theme/constants.dart";
+import "package:nxcalculator/utils/strings.dart";
 import "package:nxcalculator/utils/ui.dart";
 import "package:provider/provider.dart";
 
@@ -69,7 +70,7 @@ class _LandscapeKeypadState extends State<LandscapeKeypad> {
     "{euler}": "e",
     "{ln}": widget.isInverted ? "e" : "ln(",
     "{log}": widget.isInverted ? "10" : "log(",
-    "{decimal}": ".",
+    "{decimal}": getLocaleDecimalSeparator(),
     "{digit_0}": "0",
     "{percent}": "%",
     "{bracket}": "()",

@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:nxcalculator/theme/constants.dart";
+import "package:nxcalculator/utils/strings.dart";
 import "package:nxcalculator/utils/ui.dart";
 
 class PortraitKeypad extends StatefulWidget {
@@ -58,7 +59,7 @@ class _PortraitKeypadState extends State<PortraitKeypad> {
     "{digit_2}": "2",
     "{digit_3}": "3",
     "{add}": "+",
-    "{decimal}": ".",
+    "{decimal}": getLocaleDecimalSeparator(),
     "{digit_0}": "0",
     "{delete}": "C",
     "{equals}": "=",

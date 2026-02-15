@@ -1,7 +1,6 @@
 import "package:flutter/material.dart";
 import "package:nxcalculator/theme/constants.dart";
-
-
+import "package:nxcalculator/utils/strings.dart";
 
 InlineSpan getEquationText(
   String text, {
@@ -21,7 +20,11 @@ InlineSpan getEquationText(
       ),
     );
   }
-  return TextSpan(text: text);
+  if (text == ".") {
+    return TextSpan(text: getLocaleDecimalSeparator());
+  }
+
+  return TextSpan(text: getFormattedResult(text, noSeparator: true));
 }
 
 WidgetSpan superscript(String text) {

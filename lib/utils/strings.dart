@@ -7,10 +7,11 @@ String getFormattedResult(
   String result, {
   int maxIntegerDigits = 13,
   int maxFractionDigits = 12,
+  bool noSeparator = false,
 }) {
   final number = Decimal.tryParse(result);
 
-  if (number == null) {
+  if (result.isEmpty || number == null) {
     return result;
   }
 
@@ -18,7 +19,7 @@ String getFormattedResult(
   late final DecimalFormatter formatter;
 
   final integerLength = number.abs().truncate().toString().length;
-  final locale = PlatformDispatcher.instance.locale.toString();
+  final locale = PlatformDispatcher.instance.locale.toLanguageTag();
 
   if (integerLength > maxIntegerDigits) {
     final isNegative = number < Decimal.zero;
@@ -47,9 +48,14 @@ String getFormattedResult(
       "${digits[0]}.${digits.substring(1, fractionDigits)}",
     );
 
-    format = (NumberFormat.decimalPattern(locale));
+    format = NumberFormat.decimalPattern(locale);
     format.maximumFractionDigits = fractionDigits;
     format.minimumFractionDigits = 0;
+
+    if (noSeparator) {
+      format.turnOffGrouping();
+    }
+
     formatter = DecimalFormatter(format);
 
     return "$sign${formatter.format(mantissa)}E$exponent";
@@ -63,8 +69,20 @@ String getFormattedResult(
   format = NumberFormat.decimalPattern(locale);
   format.maximumFractionDigits = fractionDigits;
   format.minimumFractionDigits = 0;
+
+  if (noSeparator) {
+    format.turnOffGrouping();
+  }
+
   formatter = DecimalFormatter(format);
   return formatter.format(
     Decimal.parse(number.toStringAsFixed(fractionDigits)),
   );
+}
+
+String getLocaleDecimalSeparator() {
+  final locale = PlatformDispatcher.instance.locale.toLanguageTag();
+  final symbols = NumberFormat.decimalPattern(locale).symbols;
+
+  return symbols.DECIMAL_SEP;
 }

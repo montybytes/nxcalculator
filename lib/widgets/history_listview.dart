@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import "package:nxcalculator/models/history_item.dart";
 import "package:nxcalculator/theme/constants.dart";
+import "package:nxcalculator/utils/strings.dart";
 import "package:nxcalculator/utils/ui.dart";
 
 class HistoryListview extends StatefulWidget {
@@ -100,7 +101,9 @@ class _HistoryListviewState extends State<HistoryListview> {
                                           CrossAxisAlignment.stretch,
                                       children: [
                                         Text(
-                                          widget.history[index].result,
+                                          getFormattedResult(
+                                            widget.history[index].result,
+                                          ),
                                           textAlign: TextAlign.end,
                                           maxLines: 1,
                                           style: const TextStyle(fontSize: 32),

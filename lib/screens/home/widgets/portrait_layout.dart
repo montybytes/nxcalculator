@@ -208,7 +208,7 @@ class _PortraitLayoutState extends State<PortraitLayout> {
                           _repo.evaluate(printError: true);
 
                           final item = HistoryItem(
-                            result: getFormattedResult(_repo.result),
+                            result: _repo.result,
                             equation: [..._repo.equation],
                           );
 
@@ -224,7 +224,7 @@ class _PortraitLayoutState extends State<PortraitLayout> {
                                 _repo.insertToken(result);
                               }
                             } else {
-                              _repo.addDigit(result);
+                              _repo.insertToken(result);
                             }
                           }
                         },
@@ -270,7 +270,7 @@ class _PortraitLayoutState extends State<PortraitLayout> {
           _repo.insertToken(item.result);
         }
       } else {
-        _repo.addDigit(item.result);
+        _repo.insertToken(item.result);
       }
     }
   }
