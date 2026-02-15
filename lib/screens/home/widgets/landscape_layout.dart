@@ -57,11 +57,12 @@ class _LandscapeLayoutState extends State<LandscapeLayout> {
                                   repo.insertToken(item.result);
                                 }
                               } else {
-                                repo.addDigit(item.result);
+                                repo.insertToken(item.result);
                               }
                             },
-                            onDelete: (index) async =>
-                                await repo.removeFromHistory(index),
+                            onDelete: (index) async {
+                              await repo.removeFromHistory(index);
+                            },
                           );
                         },
                       );
@@ -190,16 +191,20 @@ class _LandscapeLayoutState extends State<LandscapeLayout> {
                           _repo.evaluate(printError: true);
 
                           final item = HistoryItem(
-                            result: getFormattedResult(_repo.result),
+                            result: _repo.result,
                             equation: [..._repo.equation],
                           );
 
                           if (await _repo.saveHistory(item)) {
                             _repo.clear();
-                            if (_repo.history.first.result.contains("E")) {
-                              _repo.insertToken(_repo.history.first.result);
+                            final result = _repo.history.first.result;
+                            if (result.contains("E")) {
+                              if (result.startsWith("-")) {
+                                _repo.addOperation("-");
+                                _repo.insertToken(result.substring(1));
+                              }
                             } else {
-                              _repo.addDigit(_repo.history.first.result);
+                              _repo.insertToken(result);
                             }
                           }
                         },
