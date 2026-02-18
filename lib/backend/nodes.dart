@@ -254,15 +254,32 @@ class BinaryNode extends Node {
 
     switch (type) {
       case BinaryNodeType.POWER:
+        if (l == Decimal.zero) {
+          if (r < Decimal.zero) {
+            throw CalculatorException("Division By zero");
+          }
+          return Decimal.zero;
+        }
+
+        if (l < Decimal.zero && r.isInteger == false) {
+          throw CalculatorException("Math Error");
+        }
+
+        if (r == Decimal.zero) {
+          return Decimal.one;
+        }
+
         final digitCountEstimate =
             r * _toDecimal(Math.log(l.abs().toDouble()) / Math.ln10);
 
-        if (digitCountEstimate > Decimal.fromInt(20000)) {
-          throw CalculatorException("Can't calculate");
+        if (l.isInteger == false) {
+          if (digitCountEstimate > Decimal.fromInt(310)) {
+            throw CalculatorException("Can't calculate");
+          }
         }
 
-        if (l.toDouble() == Math.e) {
-          return _toDecimal(Math.pow(Math.e, r.toDouble()).toDouble());
+        if (digitCountEstimate > Decimal.fromInt(20000)) {
+          throw CalculatorException("Can't calculate");
         }
 
         final exp = r.toBigInt();
@@ -290,6 +307,7 @@ class BinaryNode extends Node {
               scaleOnInfinitePrecision: 28,
             );
           }
+
           return result;
         }
 
