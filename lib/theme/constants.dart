@@ -1,5 +1,7 @@
 import "package:flutter/material.dart";
 
+const defaultFontFamily = "Inter";
+
 const nothingRed = Color(0xFFD71921);
 
 const lightThemeText = Color(0xFF1C1C1C);

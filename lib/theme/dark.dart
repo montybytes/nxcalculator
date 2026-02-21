@@ -14,6 +14,7 @@ final darkTheme = ThemeData(
   textTheme: ThemeData().textTheme.apply(
     bodyColor: darkThemeText,
     displayColor: darkThemeText,
+    fontFamily: defaultFontFamily,
   ),
   cardTheme: cardDefaultTheme.copyWith(color: darkThemeCard),
   dialogTheme: const DialogThemeData(backgroundColor: darkThemeCard),

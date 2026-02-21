@@ -3,7 +3,7 @@ import "package:nxcalculator/models/history_item.dart";
 import "package:nxcalculator/repositories/calculator.dart";
 import "package:nxcalculator/screens/home/widgets/equation_input_field.dart";
 import "package:nxcalculator/utils/strings.dart";
-import "package:nxcalculator/widgets/dynamic_appbar.dart";
+import "package:nxcalculator/screens/home/widgets/dynamic_appbar.dart";
 import "package:nxcalculator/widgets/history_listview.dart";
 import "package:nxcalculator/widgets/landscape_keypad.dart";
 import "package:provider/provider.dart";
@@ -81,59 +81,41 @@ class _LandscapeLayoutState extends State<LandscapeLayout> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 spacing: 16,
                 children: [
-                  Flexible(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Flexible(
-                          flex: 3,
-                          child: Consumer<CalculatorRepository>(
-                            builder: (context, repo, child) {
-                              return EquationInputField(
-                                equation: repo.equation,
-                                maxFontSize: 48,
-                                minFontSize: 48,
-                                focusNode: focusNode,
-                                style: const TextStyle(
-                                  height: 1,
-                                  fontFamily: "Inter",
-                                ),
-                                onSelectionChanged: (cursorPosition) {
-                                  repo.setCursorFromCharOffset(cursorPosition);
-                                },
-                              );
-                            },
-                          ),
-                        ),
-                        const Spacer(),
-                        Flexible(
-                          flex: 2,
-                          child: Consumer<CalculatorRepository>(
-                            builder: (context, repo, child) {
-                              final text = repo.result == "" && repo.error != ""
-                                  ? repo.error
-                                  : getFormattedResult(
-                                      repo.result,
-                                      maxIntegerDigits: 13,
-                                      maxFractionDigits: 18,
-                                    );
+                  Consumer<CalculatorRepository>(
+                    builder: (context, repo, child) {
+                      return EquationInputField(
+                        equation: repo.equation,
+                        maxFontSize: 48,
+                        minFontSize: 48,
+                        focusNode: focusNode,
+                        style: const TextStyle(height: 1),
+                        onSelectionChanged: (cursorPosition) {
+                          repo.setCursorFromCharOffset(cursorPosition);
+                        },
+                      );
+                    },
+                  ),
+                  Consumer<CalculatorRepository>(
+                    builder: (context, repo, child) {
+                      final text = repo.result == "" && repo.error != ""
+                          ? repo.error
+                          : getFormattedResult(
+                              repo.result,
+                              maxIntegerDigits: 13,
+                              maxFractionDigits: 18,
+                            );
 
-                              return SelectableText(
-                                text,
-                                maxLines: 1,
-                                textAlign: TextAlign.end,
-                                style: TextStyle(
-                                  height: 1,
-                                  fontFamily: "Inter",
-                                  fontSize: 38,
-                                  color: Colors.grey[600],
-                                ),
-                              );
-                            },
-                          ),
+                      return SelectableText(
+                        text,
+                        maxLines: 1,
+                        textAlign: TextAlign.end,
+                        style: TextStyle(
+                          height: 1,
+                          fontSize: 38,
+                          color: Colors.grey[600],
                         ),
-                      ],
-                    ),
+                      );
+                    },
                   ),
                   Consumer<CalculatorRepository>(
                     builder: (context, repo, child) {

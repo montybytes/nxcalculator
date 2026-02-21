@@ -14,6 +14,7 @@ final lightTheme = ThemeData(
   textTheme: ThemeData().textTheme.apply(
     bodyColor: lightThemeText,
     displayColor: lightThemeText,
+    fontFamily: defaultFontFamily,
   ),
   cardTheme: cardDefaultTheme.copyWith(color: lightThemeCard),
   dialogTheme: const DialogThemeData(backgroundColor: lightThemeBackground),

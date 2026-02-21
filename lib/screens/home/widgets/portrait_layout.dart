@@ -5,7 +5,7 @@ import "package:nxcalculator/repositories/calculator.dart";
 import "package:nxcalculator/theme/constants.dart";
 import "package:nxcalculator/screens/home/widgets/equation_input_field.dart";
 import "package:nxcalculator/utils/strings.dart";
-import "package:nxcalculator/widgets/dynamic_appbar.dart";
+import "package:nxcalculator/screens/home/widgets/dynamic_appbar.dart";
 import "package:nxcalculator/widgets/history_listview.dart";
 import "package:nxcalculator/widgets/portrait_keypad.dart";
 import "package:provider/provider.dart";
@@ -82,71 +82,51 @@ class _PortraitLayoutState extends State<PortraitLayout> {
             mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Flexible(
-                flex: 3,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Flexible(
-                      flex: 3,
-                      child: Consumer<CalculatorRepository>(
-                        builder: (context, repo, child) {
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 24),
-                            child: EquationInputField(
-                              clip: false,
-                              maxFontSize: 72,
-                              minFontSize: 38,
-                              focusNode: focusNode,
-                              style: const TextStyle(
-                                height: 1,
-                                fontFamily: "Inter",
-                              ),
-                              equation: repo.equation,
-                              onSelectionChanged: (cursorPosition) {
-                                repo.setCursorFromCharOffset(cursorPosition);
-                              },
-                            ),
-                          );
-                        },
-                      ),
+              Consumer<CalculatorRepository>(
+                builder: (context, repo, child) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: EquationInputField(
+                      clip: false,
+                      maxFontSize: 72,
+                      minFontSize: 38,
+                      focusNode: focusNode,
+                      style: const TextStyle(height: 1),
+                      equation: repo.equation,
+                      onSelectionChanged: (cursorPosition) {
+                        repo.setCursorFromCharOffset(cursorPosition);
+                      },
                     ),
-                    const SizedBox(height: 24),
-                    Flexible(
-                      flex: 3,
-                      child: Consumer<CalculatorRepository>(
-                        builder: (context, repo, child) {
-                          final text = repo.result == "" && repo.error != ""
-                              ? repo.error
-                              : getFormattedResult(
-                                  repo.result,
-                                  maxIntegerDigits: 13,
-                                  maxFractionDigits: 13,
-                                );
-
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 24),
-                            child: SelectableText(
-                              text,
-                              maxLines: 1,
-                              textAlign: TextAlign.end,
-                              style: TextStyle(
-                                height: 1,
-
-                                fontFamily: "Inter",
-                                fontSize: 38,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
+                  );
+                },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
+              Consumer<CalculatorRepository>(
+                builder: (context, repo, child) {
+                  final text = repo.result == "" && repo.error != ""
+                      ? repo.error
+                      : getFormattedResult(
+                          repo.result,
+                          maxIntegerDigits: 13,
+                          maxFractionDigits: 13,
+                        );
+
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: SelectableText(
+                      text,
+                      maxLines: 1,
+                      textAlign: TextAlign.end,
+                      style: TextStyle(
+                        height: 1,
+                        fontSize: 40,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 56),
               Flexible(
                 flex: 8,
                 child: Padding(
