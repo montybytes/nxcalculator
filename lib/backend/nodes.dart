@@ -94,7 +94,7 @@ class UnaryNode extends Node {
 
           if (exp.isNegative) {
             return (Decimal.one / result).toDecimal(
-              scaleOnInfinitePrecision: 28,
+              scaleOnInfinitePrecision: 128,
             );
           }
           return result;
@@ -304,7 +304,7 @@ class BinaryNode extends Node {
 
           if (exp.isNegative) {
             return (Decimal.one / result).toDecimal(
-              scaleOnInfinitePrecision: 28,
+              scaleOnInfinitePrecision: 128,
             );
           }
 
@@ -332,7 +332,7 @@ class BinaryNode extends Node {
         if (r == Decimal.zero) {
           throw CalculatorException("Division By Zero");
         }
-        return (l / r).toDecimal(scaleOnInfinitePrecision: 28);
+        return (l / r).toDecimal(scaleOnInfinitePrecision: 128);
     }
   }
 
@@ -352,7 +352,7 @@ class PercentNode extends Node {
     final Decimal v = value.compute();
 
     return b *
-        (v / Decimal.fromInt(100)).toDecimal(scaleOnInfinitePrecision: 28);
+        (v / Decimal.fromInt(100)).toDecimal(scaleOnInfinitePrecision: 128);
   }
 
   @override
