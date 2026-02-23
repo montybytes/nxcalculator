@@ -1,5 +1,7 @@
 import "package:flutter/material.dart";
+import "package:nxcalculator/registries/settings.dart";
 import "package:nxcalculator/repositories/calculator.dart";
+import "package:nxcalculator/repositories/settings.dart";
 import "package:nxcalculator/screens/settings/settings.dart";
 import "package:nxcalculator/theme/constants.dart";
 import "package:nxcalculator/utils/ui.dart";
@@ -20,35 +22,43 @@ class DynamicAppbar extends StatefulWidget {
 class _DynamicAppbarState extends State<DynamicAppbar> {
   final _menuKey = GlobalKey();
 
-  bool get _isDark =>
-      MediaQuery.of(context).platformBrightness == Brightness.dark;
+  CalculatorRepository get _calculator => context.read<CalculatorRepository>();
 
-  CalculatorRepository get _repo => context.read<CalculatorRepository>();
+  bool get _isDark => Theme.of(context).brightness == Brightness.dark;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: widget.padding ?? EdgeInsetsGeometry.zero,
-      child: AppBar(
-        titleSpacing: 0,
-        title: const Text(
-          "Calculator",
-          style: TextStyle(fontFamily: "Ntype-82", fontSize: 36),
-          strutStyle: StrutStyle(forceStrutHeight: true, fontSize: 36),
-        ),
-        actions: [
-          ...?widget.actions,
-          IconButton(
-            tooltip: "Options",
-            key: _menuKey,
-            icon: _isDark
-                ? Image.asset("assets/icons/dark/more.png")
-                : Image.asset("assets/icons/light/more.png"),
-            padding: const EdgeInsets.all(14),
-            onPressed: _showPopupMenu,
+    return Consumer<SettingsRepository>(
+      builder: (context, repo, child) {
+        return Padding(
+          padding: widget.padding ?? EdgeInsetsGeometry.zero,
+          child: AppBar(
+            titleSpacing: 0,
+            title: repo.get(hideCalcTextSetting)
+                ? null
+                : const Text(
+                    "Calculator",
+                    style: TextStyle(fontFamily: "Ntype-82", fontSize: 36),
+                    strutStyle: StrutStyle(
+                      forceStrutHeight: true,
+                      fontSize: 36,
+                    ),
+                  ),
+            actions: [
+              ...?widget.actions,
+              IconButton(
+                tooltip: "Options",
+                key: _menuKey,
+                icon: _isDark
+                    ? Image.asset("assets/icons/dark/more.png")
+                    : Image.asset("assets/icons/light/more.png"),
+                padding: const EdgeInsets.all(14),
+                onPressed: _showPopupMenu,
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -99,7 +109,7 @@ class _DynamicAppbarState extends State<DynamicAppbar> {
           );
 
           if (shouldClear ?? false) {
-            await _repo.clearHistory();
+            await _calculator.clearHistory();
           }
         }
       case "open_settings":

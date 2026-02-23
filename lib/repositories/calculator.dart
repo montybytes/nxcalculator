@@ -365,7 +365,10 @@ class CalculatorRepository with ChangeNotifier {
    * Local Storage Functions
    */
 
-  Future<bool> saveHistory(HistoryItem item, {bool checkLast = false}) async {
+  Future<bool> saveHistory(
+    HistoryItem item, {
+    bool preventDuplicate = false,
+  }) async {
     if (!_isNumber(result)) {
       return false;
     }
@@ -374,7 +377,7 @@ class CalculatorRepository with ChangeNotifier {
       return false;
     }
 
-    if (checkLast) {
+    if (preventDuplicate) {
       if (history.isNotEmpty && history.first.equals(item)) {
         return false;
       }

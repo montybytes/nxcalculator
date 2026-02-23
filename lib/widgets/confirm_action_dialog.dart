@@ -1,5 +1,7 @@
 import "package:flutter/material.dart";
+import "package:nxcalculator/repositories/settings.dart";
 import "package:nxcalculator/theme/constants.dart";
+import "package:provider/provider.dart";
 
 class ConfirmActionDialog extends StatelessWidget {
   const ConfirmActionDialog({
@@ -17,32 +19,45 @@ class ConfirmActionDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = MediaQuery.of(context).platformBrightness == Brightness.dark;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return AlertDialog(
-      actionsPadding: const EdgeInsets.all(16),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
-      title: Text(titleText, textAlign: TextAlign.center),
-      content: Text(infoText, textAlign: TextAlign.center),
-      actions: [
-        SizedBox(
-          width: double.infinity,
-          child: TextButton(
-            style: _buildActionButtonStyle(isConfirm: true, isDark: isDark),
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text("OK"),
+    return Consumer<SettingsRepository>(
+      builder: (context, settings, child) {
+        return AlertDialog(
+          actionsPadding: const EdgeInsets.all(16),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 48,
+            vertical: 16,
           ),
-        ),
-        const SizedBox(height: 2),
-        SizedBox(
-          width: double.infinity,
-          child: TextButton(
-            style: _buildActionButtonStyle(isConfirm: false, isDark: isDark),
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text("CANCEL"),
-          ),
-        ),
-      ],
+          title: Text(titleText, textAlign: TextAlign.center),
+          content: Text(infoText, textAlign: TextAlign.center),
+          actions: [
+            SizedBox(
+              width: double.infinity,
+              child: TextButton(
+                style: _buildActionButtonStyle(
+                  isConfirm: true,
+                  isDark: isDark,
+                ),
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text("OK"),
+              ),
+            ),
+            const SizedBox(height: 2),
+            SizedBox(
+              width: double.infinity,
+              child: TextButton(
+                style: _buildActionButtonStyle(
+                  isConfirm: false,
+                  isDark: isDark,
+                ),
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text("CANCEL"),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
