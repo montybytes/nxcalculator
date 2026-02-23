@@ -22,4 +22,5 @@ final lightTheme = ThemeData(
     backgroundColor: lightThemeBackground,
   ),
   dividerColor: lightThemeText,
+  listTileTheme: const ListTileThemeData(tileColor: lightThemeListItem),
 );

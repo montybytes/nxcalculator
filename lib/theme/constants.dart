@@ -10,7 +10,7 @@ const darkThemeText = Color(0xFFEFEFEF);
 const lightThemeBackground = Color(0xFFF2F2F2);
 const darkThemeBackground = Color(0xFF000000);
 
-const lightThemeCard = Color(0xFFFFFFFF);
+const lightThemeCard = Color(0xFFE3E3E3);
 const darkThemeCard = Color(0xFF1C1C1C);
 
 const lightThemeListItem = Color(0xFFFFFFFF);

@@ -20,4 +20,5 @@ final darkTheme = ThemeData(
   dialogTheme: const DialogThemeData(backgroundColor: darkThemeCard),
   bottomSheetTheme: const BottomSheetThemeData(backgroundColor: darkThemeCard),
   dividerColor: darkThemeText,
+  listTileTheme: const ListTileThemeData(tileColor: darkThemeListItem),
 );
