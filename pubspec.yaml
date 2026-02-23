@@ -3,7 +3,7 @@ description: "A calculator that fits into the Nothing OS ecosystem of apps."
 
 publish_to: "none"
 
-version: 1.1.1-a
+version: 1.2.0-a
 
 environment:
   sdk: ^3.8.1
