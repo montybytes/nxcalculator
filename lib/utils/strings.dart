@@ -1,3 +1,5 @@
+import "dart:math";
+
 import "package:decimal/decimal.dart";
 import "package:decimal/intl.dart";
 import "package:flutter/foundation.dart";
@@ -69,7 +71,7 @@ String getFormattedResult(
         .clamp(0, maxFractionDigits);
 
     final mantissa = Decimal.parse(
-      "${digits[0]}.${digits.substring(1, fractionDigits)}",
+      "${digits[0]}.${digits.substring(1, min(digits.length, fractionDigits))}",
     );
 
     format.maximumFractionDigits = fractionDigits;
@@ -105,7 +107,7 @@ String getFormattedResult(
           .clamp(0, maxFractionDigits);
 
       final mantissa = Decimal.parse(
-        "${digits[0]}.${digits.substring(1, fractionDigits)}",
+        "${digits[0]}.${digits.substring(1, min(digits.length, fractionDigits))}",
       );
 
       format.maximumFractionDigits = fractionDigits;
