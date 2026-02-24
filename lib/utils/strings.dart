@@ -100,10 +100,13 @@ String getFormattedResult(
       );
 
       final exponent = -(firstNonZero + 1);
-      final mantissa = Decimal.parse("${digits[0]}.${digits.substring(1)}");
 
       final fractionDigits = (maxFractionDigits - exponent.toString().length)
           .clamp(0, maxFractionDigits);
+
+      final mantissa = Decimal.parse(
+        "${digits[0]}.${digits.substring(1, fractionDigits)}",
+      );
 
       format.maximumFractionDigits = fractionDigits;
       format.minimumFractionDigits = 0;
@@ -169,6 +172,10 @@ String _getFormattedNumber(String number, SettingsRepository? settings) {
 
   if (parts.length > 1) {
     return "${parts[0].replaceAll(",", groupSep)}$decimalSep${parts[1]}";
+  }
+
+  if (parts.length == 1 && parts[0].contains(",")) {
+    return parts[0].replaceAll(",", groupSep);
   }
 
   return number;
