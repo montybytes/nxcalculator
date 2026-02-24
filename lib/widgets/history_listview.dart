@@ -33,7 +33,7 @@ class _HistoryListviewState extends State<HistoryListview> {
           children: [
             const Text(
               "History",
-              style: TextStyle(fontSize: 24, fontFamily: "NType-82"),
+              style: TextStyle(fontSize: 24, fontFamily: "NType"),
             ),
             const SizedBox(height: 16),
             Expanded(

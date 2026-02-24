@@ -5,6 +5,7 @@ import "package:nxcalculator/screens/settings/widgets/multi_selectable_setting_t
 import "package:nxcalculator/theme/constants.dart";
 import "package:nxcalculator/utils/strings.dart";
 import "package:nxcalculator/utils/ui.dart";
+import "package:nxcalculator/widgets/custom_checkbox.dart";
 import "package:nxcalculator/widgets/custom_switch.dart";
 import "package:provider/provider.dart";
 
@@ -28,7 +29,7 @@ class SettingsScreen extends StatelessWidget {
                   titleSpacing: 0,
                   title: const Text(
                     "Settings",
-                    style: TextStyle(fontFamily: "NType-82", fontSize: 36),
+                    style: TextStyle(fontFamily: "NType", fontSize: 36),
                     strutStyle: StrutStyle(
                       forceStrutHeight: true,
                       fontSize: 36,
@@ -176,17 +177,41 @@ class SettingsScreen extends StatelessWidget {
     String value, {
     ShapeBorder? shape,
   }) {
-    return Material(
-      child: ListTile(
-        shape: shape,
-        onTap: () {},
-        title: Text(
-          "WIP: ${setting.name}",
-          style: const TextStyle(fontSize: 18),
-        ),
-        subtitle: Text(value),
-        trailing: const SizedBox(),
-      ),
+    var iconName = "expand";
+
+    return StatefulBuilder(
+      builder: (context, setState) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+
+        return Material(
+          child: ExpansionTile(
+            shape: shape,
+            collapsedShape: shape,
+            initiallyExpanded: false,
+            onExpansionChanged: (value) => setState(() {
+              iconName = value ? "contract" : "expand";
+            }),
+            title: Text(setting.name, style: const TextStyle(fontSize: 18)),
+            subtitle: Text("Current: $value"),
+            trailing: SizedBox.square(
+              dimension: 32,
+              child: isDark
+                  ? Image.asset("assets/icons/dark/$iconName.png")
+                  : Image.asset("assets/icons/light/$iconName.png"),
+            ),
+            children: ["Inter", "LetteraMono", "NDot", "NType"].map((font) {
+              return ListTile(
+                title: Text(font, style: TextStyle(fontFamily: font)),
+                trailing: CustomCheckbox(
+                  value: value == font,
+                  onChanged: (value) => settings.set(setting, font),
+                ),
+                onTap: () => settings.set(setting, font),
+              );
+            }).toList(),
+          ),
+        );
+      },
     );
   }
 

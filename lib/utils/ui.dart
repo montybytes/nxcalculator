@@ -35,20 +35,18 @@ InlineSpan getEquationText(
     );
   }
 
-  return TextSpan(
-    text: getFormattedResult(text, noSeparator: true, settings: settings),
-  );
+  return TextSpan(text: getFormattedResult(text, settings: settings));
 }
 
-WidgetSpan superscript(String text) {
+WidgetSpan superscript(String text, {String? family, double? fontSize}) {
   return WidgetSpan(
     alignment: PlaceholderAlignment.top,
     child: Transform.translate(
-      offset: const Offset(0, -6),
+      offset: const Offset(0, -5),
       child: Text(
         text,
-        textScaler: const TextScaler.linear(0.7),
-        style: const TextStyle(fontSize: 20),
+        textScaler: const TextScaler.linear(0.8),
+        style: TextStyle(fontSize: fontSize, fontFamily: family),
       ),
     ),
   );

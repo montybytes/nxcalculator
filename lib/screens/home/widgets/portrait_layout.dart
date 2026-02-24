@@ -124,6 +124,14 @@ class _PortraitLayoutState extends State<PortraitLayout> {
                                 ? 38
                                 : 40,
                             color: Colors.grey[600],
+                            fontFamily: _settings.get(
+                              equationResultFontSetting,
+                            ),
+                            letterSpacing:
+                                _settings.get(equationResultFontSetting) ==
+                                    "LetteraMono"
+                                ? -7
+                                : null,
                           ),
                         ),
                       );

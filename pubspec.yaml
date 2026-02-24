@@ -26,14 +26,15 @@ flutter:
   assets:
     - assets/
     - assets/fonts/
+    - assets/icons/
     - assets/icons/light/
     - assets/icons/dark/
 
   fonts:
-    - family: NType-82
+    - family: NType
       fonts:
         - asset: assets/fonts/NType82.otf
-    - family: NDot-77
+    - family: NDot
       fonts:
         - asset: assets/fonts/NDot77.otf
     - family: LetteraMono

@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:nxcalculator/registries/settings.dart";
 import "package:nxcalculator/repositories/settings.dart";
 import "package:nxcalculator/utils/ui.dart";
 import "package:provider/provider.dart";
@@ -129,12 +130,17 @@ class EquationInputField extends StatelessWidget {
     required double superVerticalOffset,
     SettingsRepository? settings,
   }) {
+    final font = settings?.get(equationResultFontSetting);
+
     return SelectableText.rich(
       maxLines: 1,
       showCursor: true,
       focusNode: focusNode,
       textAlign: TextAlign.end,
-      style: styleOverride,
+      style: styleOverride.copyWith(
+        fontFamily: font,
+        letterSpacing: font == "LetteraMono" ? -6 : null,
+      ),
       onSelectionChanged: (selection, cause) {
         if (cause == SelectionChangedCause.drag ||
             cause == SelectionChangedCause.tap) {
@@ -148,7 +154,10 @@ class EquationInputField extends StatelessWidget {
         children: equation.map((token) {
           return getEquationText(
             token,
-            superStyle: TextStyle(fontSize: superFontSize),
+            superStyle: TextStyle(
+              fontSize: superFontSize,
+              fontFamily: settings?.get(equationResultFontSetting),
+            ),
             superVerticalOffset: superVerticalOffset,
             settings: settings,
           );

@@ -104,7 +104,7 @@ class _LandscapeLayoutState extends State<LandscapeLayout> {
                           ? repo.error
                           : getFormattedResult(
                               repo.result,
-                              maxIntegerDigits: 13,
+                              maxIntegerDigits: 18,
                               maxFractionDigits: 18,
                             );
 
@@ -116,6 +116,12 @@ class _LandscapeLayoutState extends State<LandscapeLayout> {
                           height: 1,
                           fontSize: 38,
                           color: Colors.grey[600],
+                          fontFamily: _settings.get(equationResultFontSetting),
+                          letterSpacing:
+                              _settings.get(equationResultFontSetting) ==
+                                  "LetteraMono"
+                              ? -6
+                              : null,
                         ),
                       );
                     },

@@ -38,7 +38,7 @@ class _DynamicAppbarState extends State<DynamicAppbar> {
                 ? null
                 : const Text(
                     "Calculator",
-                    style: TextStyle(fontFamily: "Ntype-82", fontSize: 36),
+                    style: TextStyle(fontFamily: "NType", fontSize: 36),
                     strutStyle: StrutStyle(
                       forceStrutHeight: true,
                       fontSize: 36,

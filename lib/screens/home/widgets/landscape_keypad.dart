@@ -86,46 +86,54 @@ class _LandscapeKeypadState extends State<LandscapeKeypad> {
   @override
   Widget build(BuildContext context) {
     return Consumer<CalculatorRepository>(
-      builder: (context, repo, child) => GridView.builder(
-        shrinkWrap: true,
-        itemCount: _keypadValues.length,
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 8,
-          crossAxisSpacing: 8,
-          mainAxisSpacing: 8,
-          childAspectRatio: 1.2,
-        ),
-        itemBuilder: (context, index) {
-          final key = _keypadValues.keys.elementAt(index);
+      builder: (context, repo, child) {
+        return GridView.builder(
+          shrinkWrap: true,
+          itemCount: _keypadValues.length,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 8,
+            crossAxisSpacing: 8,
+            mainAxisSpacing: 8,
+            childAspectRatio: 1.2,
+          ),
+          itemBuilder: (context, index) {
+            final key = _keypadValues.keys.elementAt(index);
 
-          return Material(
-            color: _getButtonBGColor(key),
-            shape: _getButtonShape(key),
-            child: InkWell(
-              customBorder: _getButtonShape(key),
-              onTap: () => _onButtonPress(key),
-              child: Center(child: _getButtonWidget(key)),
-            ),
-          );
-        },
-      ),
+            return Material(
+              color: _getButtonBGColor(key),
+              shape: _getButtonShape(key),
+              child: InkWell(
+                customBorder: _getButtonShape(key),
+                onTap: () => _onButtonPress(key),
+                child: Center(child: _getButtonWidget(key)),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
   String? _getButtonFont(String buttonKey) {
+    final font = _settings.get(numpadFontSetting);
+
     if (buttonKey.contains("digit")) {
-      return "NType-82";
+      return font;
     }
 
-    switch (buttonKey) {
-      case "{clear}":
-      case "{delete}":
-      case "{decimal}":
-        return "NType-82";
-      default:
-        return "LetteraMono";
-    }
+    return switch (buttonKey) {
+      "{divide}" when font == "NType" => "LetteraMono",
+      "{multiply}" when font == "NType" => "LetteraMono",
+      "{subtract}" when font == "NType" => "LetteraMono",
+      "{add}" when font == "NType" => "LetteraMono",
+      "{equals}" when font == "NType" => "LetteraMono",
+      "{pi}" when font == "NType" => "LetteraMono",
+      "{power}" when font == "NType" => "LetteraMono",
+      "{root}" when font == "NType" && !widget.isInverted => "LetteraMono",
+      "{factorial}" when font == "NType" => "LetteraMono",
+      _ => font,
+    };
   }
 
   Color _getButtonBGColor(String buttonKey) {
@@ -178,7 +186,7 @@ class _LandscapeKeypadState extends State<LandscapeKeypad> {
         return _getRichTextWidget(buttonKey);
       case "{invert}":
       case "{mode}":
-        final fontSize = 20.0;
+        final fontSize = 22.0;
         return Text(
           _keypadValues[buttonKey] ?? "",
           style: TextStyle(
@@ -193,7 +201,7 @@ class _LandscapeKeypadState extends State<LandscapeKeypad> {
       case "{euler}":
       case "{factorial}":
       case "{power}":
-        final fontSize = 24.0;
+        final fontSize = 22.0;
         return Text(
           _keypadValues[buttonKey] ?? "",
           style: TextStyle(
@@ -205,16 +213,33 @@ class _LandscapeKeypadState extends State<LandscapeKeypad> {
           textAlign: TextAlign.center,
         );
       default:
-        final fontSize = 32.0;
+        final font = _getButtonFont(buttonKey);
+        final fontSize = 22.0;
 
         return _settings.get(preferIconsToTextSetting) &&
                 buttonKey == "{delete}"
-            ? SizedBox.square(
-                dimension: 32,
-                child: _isDark
-                    ? Image.asset("assets/icons/dark/backspace.png")
-                    : Image.asset("assets/icons/light/backspace.png"),
-              )
+            ? font == "NDot"
+                  ? Center(
+                      child: Text(
+                        "<<",
+                        style: TextStyle(
+                          color: _getButtonFGColor(buttonKey),
+                          fontFamily: _getButtonFont(buttonKey),
+                          fontSize: fontSize,
+                        ),
+                        strutStyle: StrutStyle(
+                          fontSize: fontSize,
+                          forceStrutHeight: true,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    )
+                  : SizedBox.square(
+                      dimension: 28,
+                      child: _isDark
+                          ? Image.asset("assets/icons/dark/backspace.png")
+                          : Image.asset("assets/icons/light/backspace.png"),
+                    )
             : Text(
                 _keypadValues[buttonKey] ?? "",
                 style: TextStyle(
@@ -232,27 +257,39 @@ class _LandscapeKeypadState extends State<LandscapeKeypad> {
   }
 
   Widget _getRichTextWidget(String buttonKey) {
+    final font = _getButtonFont(buttonKey);
+    final fontSize = 22.0;
+
+    final style = TextStyle(
+      fontSize: fontSize,
+      fontFamily: font,
+      letterSpacing: font == "LetteraMono" ? -4 : 0,
+      color: _isDark ? darkThemeText : lightThemeText,
+    );
+
+    final superText = switch (buttonKey) {
+      "{root}" when widget.isInverted => "2",
+      "{sin}" when widget.isInverted => "-1",
+      "{cos}" when widget.isInverted => "-1",
+      "{tan}" when widget.isInverted => "-1",
+      "{log}" when widget.isInverted => "x",
+      "{ln}" when widget.isInverted => "x",
+      _ => "",
+    };
+
     return RichText(
-      strutStyle: const StrutStyle(fontSize: 16, forceStrutHeight: true),
+      strutStyle: StrutStyle(fontSize: fontSize, forceStrutHeight: true),
       textAlign: TextAlign.center,
       text: TextSpan(
-        style: TextStyle(
-          fontSize: 18,
-          fontFamily: "LetteraMono",
-          color: _isDark ? darkThemeText : lightThemeText,
-        ),
+        style: style,
         children: [
           TextSpan(
             text: _keypadValues[buttonKey]
                 ?.replaceAll("arc", "")
                 .replaceAll("(", ""),
           ),
-          if (buttonKey == "{root}" && widget.isInverted) superscript("2"),
-          if (widget.isInverted)
-            if (["{sin}", "{cos}", "{tan}"].contains(buttonKey))
-              superscript("-1")
-            else if ((["{ln}", "{log}"]).contains(buttonKey))
-              superscript("x"),
+          if (superText.isNotEmpty)
+            superscript(superText, fontSize: 16, family: style.fontFamily),
         ],
       ),
     );

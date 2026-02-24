@@ -164,18 +164,24 @@ class _PortraitKeypadState extends State<PortraitKeypad> {
   }
 
   String? _getButtonFont(String buttonKey) {
+    final font = _settings.get(numpadFontSetting);
+
     if (buttonKey.contains("digit")) {
-      return "NType-82";
+      return font;
     }
 
-    switch (buttonKey) {
-      case "{clear}":
-      case "{delete}":
-      case "{decimal}":
-        return "NType-82";
-      default:
-        return "LetteraMono";
-    }
+    return switch (buttonKey) {
+      "{divide}" when font == "NType" => "LetteraMono",
+      "{multiply}" when font == "NType" => "LetteraMono",
+      "{subtract}" when font == "NType" => "LetteraMono",
+      "{add}" when font == "NType" => "LetteraMono",
+      "{equals}" when font == "NType" => "LetteraMono",
+      "{pi}" when font == "NType" => "LetteraMono",
+      "{power}" when font == "NType" => "LetteraMono",
+      "{root}" when font == "NType" && !widget.isInverted => "LetteraMono",
+      "{factorial}" when font == "NType" => "LetteraMono",
+      _ => font,
+    };
   }
 
   Color _getButtonBGColor(String buttonKey) {
@@ -195,10 +201,13 @@ class _PortraitKeypadState extends State<PortraitKeypad> {
 
   ShapeBorder? _getButtonShape(String buttonKey) {
     final shape = _settings.get(numpadButtonShapeSetting);
+    final selectedBorderSide = buttonKey == "{invert}" && widget.isInverted
+        ? const BorderSide(color: nothingRed, width: 2)
+        : BorderSide.none;
 
     if (shape == NumpadShape.circular) {
       if (widget.isExtended) {
-        return const StadiumBorder();
+        return StadiumBorder(side: selectedBorderSide);
       }
       return const CircleBorder();
     }
@@ -206,15 +215,12 @@ class _PortraitKeypadState extends State<PortraitKeypad> {
     if (shape == NumpadShape.rounded) {
       return RoundedRectangleBorder(
         borderRadius: BorderRadiusGeometry.circular(24),
+        side: selectedBorderSide,
       );
     }
 
     if (widget.isExtended) {
-      return StadiumBorder(
-        side: buttonKey == "{invert}" && widget.isInverted
-            ? const BorderSide(color: nothingRed, width: 2)
-            : BorderSide.none,
-      );
+      return StadiumBorder(side: selectedBorderSide);
     }
 
     switch (buttonKey) {
@@ -270,11 +276,27 @@ class _PortraitKeypadState extends State<PortraitKeypad> {
           textAlign: TextAlign.center,
         );
       default:
+        final font = _getButtonFont(buttonKey);
+
         return _settings.get(preferIconsToTextSetting) &&
                 buttonKey == "{delete}"
             ? SizedBox.square(
                 dimension: 48,
-                child: _isDark
+                child: font == "NDot"
+                    ? Text(
+                        "<<",
+                        style: TextStyle(
+                          color: _getButtonFGColor(buttonKey),
+                          fontFamily: _getButtonFont(buttonKey),
+                          fontSize: widget.isExtended ? 40 : 52,
+                        ),
+                        strutStyle: StrutStyle(
+                          forceStrutHeight: true,
+                          fontSize: widget.isExtended ? 40 : 52,
+                        ),
+                        textAlign: TextAlign.center,
+                      )
+                    : _isDark
                     ? Image.asset("assets/icons/dark/backspace.png")
                     : Image.asset("assets/icons/light/backspace.png"),
               )
@@ -295,27 +317,37 @@ class _PortraitKeypadState extends State<PortraitKeypad> {
   }
 
   Widget _getRichTextWidget(String buttonKey) {
+    final font = _getButtonFont(buttonKey);
+
+    final style = TextStyle(
+      fontSize: font == "LetteraMono" ? 20 : 24,
+      fontFamily: font,
+      color: _isDark ? darkThemeText : lightThemeText,
+    );
+
+    final superText = switch (buttonKey) {
+      "{root}" when widget.isInverted => "2",
+      "{sin}" when widget.isInverted => "-1",
+      "{cos}" when widget.isInverted => "-1",
+      "{tan}" when widget.isInverted => "-1",
+      "{log}" when widget.isInverted => "x",
+      "{ln}" when widget.isInverted => "x",
+      _ => "",
+    };
+
     return RichText(
       strutStyle: const StrutStyle(fontSize: 24, forceStrutHeight: true),
       textAlign: TextAlign.center,
       text: TextSpan(
-        style: TextStyle(
-          fontSize: 24,
-          fontFamily: "LetteraMono",
-          color: _isDark ? darkThemeText : lightThemeText,
-        ),
+        style: style,
         children: [
           TextSpan(
             text: _extendedKeypadValues[buttonKey]
                 ?.replaceAll("arc", "")
                 .replaceAll("(", ""),
           ),
-          if (buttonKey == "{root}" && widget.isInverted) superscript("2"),
-          if (widget.isInverted)
-            if (["{sin}", "{cos}", "{tan}"].contains(buttonKey))
-              superscript("-1")
-            else if ((["{ln}", "{log}"]).contains(buttonKey))
-              superscript("x"),
+          if (superText.isNotEmpty)
+            superscript(superText, fontSize: 20, family: style.fontFamily),
         ],
       ),
     );
