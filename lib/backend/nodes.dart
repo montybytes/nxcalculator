@@ -25,7 +25,7 @@ enum UnaryNodeType {
 enum BinaryNodeType { DIVISION, MULTIPLICATION, ADDITION, SUBTRACTION, POWER }
 
 abstract class Node {
-  Decimal compute({MathMode mode = MathMode.RADIANS});
+  Decimal compute({required MathMode mode});
   String printAST();
 }
 
@@ -56,8 +56,8 @@ class UnaryNode extends Node {
   UnaryNode({required this.type, required this.operand});
 
   @override
-  Decimal compute({MathMode mode = MathMode.RADIANS}) {
-    final x = operand.compute();
+  Decimal compute({required MathMode mode}) {
+    final x = operand.compute(mode: mode);
     switch (type) {
       case UnaryNodeType.NEGATE:
         return -x;
@@ -248,9 +248,9 @@ class BinaryNode extends Node {
   BinaryNode({required this.type, required this.left, required this.right});
 
   @override
-  Decimal compute({MathMode mode = MathMode.RADIANS}) {
-    final l = left.compute();
-    final r = right.compute();
+  Decimal compute({required MathMode mode}) {
+    final l = left.compute(mode: mode);
+    final r = right.compute(mode: mode);
 
     switch (type) {
       case BinaryNodeType.POWER:
@@ -347,9 +347,9 @@ class PercentNode extends Node {
   PercentNode({required this.value, required this.base});
 
   @override
-  Decimal compute({MathMode mode = MathMode.RADIANS}) {
-    final Decimal b = base.compute();
-    final Decimal v = value.compute();
+  Decimal compute({required MathMode mode}) {
+    final Decimal b = base.compute(mode: mode);
+    final Decimal v = value.compute(mode: mode);
 
     return b *
         (v / Decimal.fromInt(100)).toDecimal(scaleOnInfinitePrecision: 128);
