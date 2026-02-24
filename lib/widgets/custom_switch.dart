@@ -9,12 +9,11 @@ class CustomSwitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const width = 48.0;
+    const height = 48.0;
+    const duration = Duration(milliseconds: 250);
+
     final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    final width = 48.0;
-    final height = 48.0;
-    final duration = const Duration(milliseconds: 250);
-
     final activeColor = isDark ? lightThemeBackground : darkThemeBackground;
     final inactiveColor = isDark
         ? const Color(0xFF484848)
