@@ -301,7 +301,9 @@ class _PortraitKeypadState extends State<PortraitKeypad> {
                     : Image.asset("assets/icons/light/backspace.png"),
               )
             : Text(
-                _basicKeypadValues[buttonKey] ?? "",
+                buttonKey == "{bracket}" && (font == "NType" || font == "Inter")
+                    ? "(  )"
+                    : _basicKeypadValues[buttonKey] ?? "",
                 style: TextStyle(
                   color: _getButtonFGColor(buttonKey),
                   fontFamily: _getButtonFont(buttonKey),

@@ -241,7 +241,9 @@ class _LandscapeKeypadState extends State<LandscapeKeypad> {
                           : Image.asset("assets/icons/light/backspace.png"),
                     )
             : Text(
-                _keypadValues[buttonKey] ?? "",
+                buttonKey == "{bracket}" && (font == "NType" || font == "Inter")
+                    ? "(  )"
+                    : _keypadValues[buttonKey] ?? "",
                 style: TextStyle(
                   color: _getButtonFGColor(buttonKey),
                   fontFamily: _getButtonFont(buttonKey),
