@@ -318,6 +318,7 @@ class _PortraitKeypadState extends State<PortraitKeypad> {
                           fontSize: widget.isExtended ? 40 : 52,
                         ),
                         strutStyle: StrutStyle(
+                          height: widget.isExtended ? 1.2 : 0.9,
                           forceStrutHeight: true,
                           fontSize: widget.isExtended ? 40 : 52,
                         ),
