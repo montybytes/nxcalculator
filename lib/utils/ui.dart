@@ -26,7 +26,7 @@ InlineSpan getEquationText(
   }
   if (text.contains(".")) {
     return TextSpan(
-      text: text.replaceAll(
+      text: getFormattedResult(text, settings: settings).replaceAll(
         ".",
         mapDecimalSeparator(
           settings?.get(decimalSeparatorSetting) ?? DecimalSeparator.system,
