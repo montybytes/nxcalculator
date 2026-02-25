@@ -1,3 +1,5 @@
+import "dart:async";
+
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:nxcalculator/models/setting.dart";
@@ -46,6 +48,8 @@ class PortraitKeypad extends StatefulWidget {
 }
 
 class _PortraitKeypadState extends State<PortraitKeypad> {
+  Timer? _longPressTimer;
+
   Map<String, String> get _basicKeypadValues => {
     "{clear}": "AC",
     "{bracket}": "()",
@@ -93,6 +97,13 @@ class _PortraitKeypadState extends State<PortraitKeypad> {
   SettingsRepository get _settings => context.read<SettingsRepository>();
 
   bool get _isDark => Theme.of(context).brightness == Brightness.dark;
+
+  @override
+  void dispose() {
+    _longPressTimer?.cancel();
+    _longPressTimer = null;
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -147,6 +158,22 @@ class _PortraitKeypadState extends State<PortraitKeypad> {
                   child: InkWell(
                     customBorder: _getButtonShape(key),
                     onTap: () => _onButtonPress(key),
+                    onLongPress: () async {
+                      if (key == "{delete}") {
+                        _longPressTimer = Timer.periodic(
+                          const Duration(milliseconds: 300),
+                          (timer) {
+                            _onButtonPress(key);
+                          },
+                        );
+                      }
+                    },
+                    onLongPressUp: () {
+                      if (key == "{delete}") {
+                        _longPressTimer?.cancel();
+                        _longPressTimer = null;
+                      }
+                    },
                     child: Center(child: _getButtonWidget(key)),
                   ),
                 );

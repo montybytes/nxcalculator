@@ -1,3 +1,5 @@
+import "dart:async";
+
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:nxcalculator/registries/settings.dart";
@@ -44,6 +46,8 @@ class LandscapeKeypad extends StatefulWidget {
 }
 
 class _LandscapeKeypadState extends State<LandscapeKeypad> {
+  Timer? _longPressTimer;
+
   Map<String, String> get _keypadValues => {
     "{mode}": widget.mode,
     "{root}": widget.isInverted ? "x" : "√",
@@ -84,6 +88,13 @@ class _LandscapeKeypadState extends State<LandscapeKeypad> {
   bool get _isDark => Theme.of(context).brightness == Brightness.dark;
 
   @override
+  void dispose() {
+    _longPressTimer?.cancel();
+    _longPressTimer = null;
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Consumer<CalculatorRepository>(
       builder: (context, repo, child) {
@@ -106,6 +117,22 @@ class _LandscapeKeypadState extends State<LandscapeKeypad> {
               child: InkWell(
                 customBorder: _getButtonShape(key),
                 onTap: () => _onButtonPress(key),
+                onLongPress: () async {
+                  if (key == "{delete}") {
+                    _longPressTimer = Timer.periodic(
+                      const Duration(milliseconds: 300),
+                      (timer) {
+                        _onButtonPress(key);
+                      },
+                    );
+                  }
+                },
+                onLongPressUp: () {
+                  if (key == "{delete}") {
+                    _longPressTimer?.cancel();
+                    _longPressTimer = null;
+                  }
+                },
                 child: Center(child: _getButtonWidget(key)),
               ),
             );
