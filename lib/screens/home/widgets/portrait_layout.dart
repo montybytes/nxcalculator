@@ -105,12 +105,14 @@ class _PortraitLayoutState extends State<PortraitLayout> {
                     builder: (context, repo, child) {
                       final text = repo.result == "" && repo.error != ""
                           ? repo.error
-                          : getFormattedResult(
+                          : !repo.isPureNumberExpression
+                          ? getFormattedResult(
                               repo.result,
                               maxIntegerDigits: 13,
                               maxFractionDigits: 13,
                               settings: settings,
-                            );
+                            )
+                          : "";
 
                       return Padding(
                         padding: _getNumpadDensity(),

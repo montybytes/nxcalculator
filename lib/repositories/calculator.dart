@@ -55,7 +55,7 @@ class CalculatorRepository with ChangeNotifier {
   bool _isLeadingValue(String s) =>
       _isNumber(s) || _isConstant(s) || s.endsWith("(");
 
-  bool _isPureNumberExpression() {
+  bool get isPureNumberExpression {
     var hasDecimal = false;
 
     if (equation.length == 1 && _isConstant(equation[0])) {
@@ -373,7 +373,7 @@ class CalculatorRepository with ChangeNotifier {
       return false;
     }
 
-    if (_isPureNumberExpression()) {
+    if (isPureNumberExpression) {
       return false;
     }
 

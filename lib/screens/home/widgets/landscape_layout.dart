@@ -102,11 +102,13 @@ class _LandscapeLayoutState extends State<LandscapeLayout> {
                     builder: (context, repo, child) {
                       final text = repo.result == "" && repo.error != ""
                           ? repo.error
-                          : getFormattedResult(
+                          : !repo.isPureNumberExpression
+                          ? getFormattedResult(
                               repo.result,
                               maxIntegerDigits: 18,
                               maxFractionDigits: 18,
-                            );
+                            )
+                          : "";
 
                       return SelectableText(
                         text,
