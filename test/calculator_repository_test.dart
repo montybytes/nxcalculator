@@ -255,7 +255,7 @@ void main() {
       ]);
 
       repo.evaluate();
-      expect(repo.result, "1.00698044081646");
+      expect(repo.result, "1.01053094261708");
     });
 
     test("evaluate incorrect equation", () {

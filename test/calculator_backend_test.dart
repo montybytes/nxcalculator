@@ -149,7 +149,7 @@ void main() {
       final log = engine.parse(["2", "^", "log", "100"]);
       expect(engine.evaluate(log), Decimal.parse("4.0"));
 
-      final ln = engine.parse(["ln", "e", "^", "2"]);
+      final ln = engine.parse(["ln", "(", "e", "^", "2"]);
       final result = engine.evaluate(ln);
       expect(result.toStringAsFixed(12).startsWith("2"), true);
     });
