@@ -82,14 +82,14 @@ class _LandscapeLayoutState extends State<LandscapeLayout> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
-                spacing: 16,
+                spacing: 8,
                 children: [
                   Consumer<CalculatorRepository>(
                     builder: (context, repo, child) {
                       return EquationInputField(
                         equation: repo.equation,
-                        maxFontSize: 48,
-                        minFontSize: 48,
+                        maxFontSize: 44,
+                        minFontSize: 44,
                         focusNode: focusNode,
                         style: const TextStyle(height: 1),
                         onSelectionChanged: (cursorPosition) {
