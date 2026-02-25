@@ -26,19 +26,22 @@ InlineSpan getEquationText(
   }
   if (text.contains(".")) {
     return TextSpan(
-      text: getFormattedResult(text, settings: settings).replaceAll(
-        ".",
-        mapDecimalSeparator(
-          settings?.get(decimalSeparatorSetting) ?? DecimalSeparator.system,
-        ),
-      ),
+      text: getFormattedResult(text, noSeparator: true, settings: settings)
+          .replaceAll(
+            ".",
+            mapDecimalSeparator(
+              settings?.get(decimalSeparatorSetting) ?? DecimalSeparator.system,
+            ),
+          ),
     );
   }
   if (text == "sqrt") {
     return const TextSpan(text: "√");
   }
 
-  return TextSpan(text: getFormattedResult(text, settings: settings));
+  return TextSpan(
+    text: getFormattedResult(text, noSeparator: true, settings: settings),
+  );
 }
 
 WidgetSpan superscript(String text, {String? family, double? fontSize}) {
