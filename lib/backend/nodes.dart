@@ -69,7 +69,7 @@ class UnaryNode extends Node {
             x * _toDecimal(Math.log(e.abs().toDouble()) / Math.ln10);
 
         if (digitCountEstimate > Decimal.fromInt(130)) {
-          throw CalculatorException("Can't calculate");
+          throw const CalculatorException("Can't calculate");
         }
 
         final exp = x.toBigInt();
@@ -103,14 +103,14 @@ class UnaryNode extends Node {
         final result = Math.pow(e, x.toDouble()).toDouble();
 
         if (result.isInfinite) {
-          throw CalculatorException("Can't calculate");
+          throw const CalculatorException("Can't calculate");
         }
 
         return _toDecimal(result);
 
       case UnaryNodeType.ROOT:
         if (x < Decimal.zero) {
-          throw CalculatorException("Imaginary Number");
+          throw const CalculatorException("Imaginary Number");
         }
         return _toDecimal(Math.sqrt(_toDouble(x)));
 
@@ -129,7 +129,7 @@ class UnaryNode extends Node {
           r = Math.tan(_angleToRadians(x, mode));
         }
         if (r.isNaN) {
-          throw CalculatorException("Domain Error");
+          throw const CalculatorException("Domain Error");
         }
         return _toDecimal((r * 1e12).round() / 1e12);
 
@@ -148,7 +148,7 @@ class UnaryNode extends Node {
           result = _radiansToAngle(Math.atan(_toDouble(x)), mode);
         }
         if (result.isNaN) {
-          throw CalculatorException("Domain Error");
+          throw const CalculatorException("Domain Error");
         }
 
         return _toDecimal((result * 1e12).round() / 1e12);
@@ -158,7 +158,7 @@ class UnaryNode extends Node {
         double result = 0;
 
         if (x <= Decimal.zero) {
-          throw CalculatorException("Domain Error");
+          throw const CalculatorException("Domain Error");
         }
         if (type == UnaryNodeType.LOG) {
           result = (Math.log(_toDouble(x)) / Math.ln10);
@@ -171,11 +171,11 @@ class UnaryNode extends Node {
 
       case UnaryNodeType.FACTORIAL:
         if (x < Decimal.zero) {
-          throw CalculatorException("Factorial of negative");
+          throw const CalculatorException("Factorial of negative");
         }
 
         if (x.scale != 0) {
-          throw CalculatorException("Factorial of fraction");
+          throw const CalculatorException("Factorial of fraction");
         }
 
         if (x == Decimal.zero || x == Decimal.one) {
@@ -183,7 +183,7 @@ class UnaryNode extends Node {
         }
 
         if (x > Decimal.fromInt(2999)) {
-          throw CalculatorException("Factorial too large");
+          throw const CalculatorException("Factorial too large");
         }
 
         Decimal trueFactorial(Decimal x) {
@@ -256,13 +256,13 @@ class BinaryNode extends Node {
       case BinaryNodeType.POWER:
         if (l == Decimal.zero) {
           if (r < Decimal.zero) {
-            throw CalculatorException("Division By zero");
+            throw const CalculatorException("Division By zero");
           }
           return Decimal.zero;
         }
 
         if (l < Decimal.zero && r.isInteger == false) {
-          throw CalculatorException("Math Error");
+          throw const CalculatorException("Math Error");
         }
 
         if (r == Decimal.zero) {
@@ -275,12 +275,12 @@ class BinaryNode extends Node {
         if (l.isInteger == false) {
           if (digitCountEstimate > Decimal.fromInt(310) ||
               digitCountEstimate < Decimal.fromInt(-5500)) {
-            throw CalculatorException("Can't calculate");
+            throw const CalculatorException("Can't calculate");
           }
         }
 
         if (digitCountEstimate > Decimal.fromInt(20000)) {
-          throw CalculatorException("Can't calculate");
+          throw const CalculatorException("Can't calculate");
         }
 
         final exp = r.toBigInt();
@@ -315,7 +315,7 @@ class BinaryNode extends Node {
         final result = Math.pow(_toDouble(l), _toDouble(r)).toDouble();
 
         if (result.isInfinite) {
-          throw CalculatorException("Can't calculate");
+          throw const CalculatorException("Can't calculate");
         }
 
         return _toDecimal(result);
@@ -331,7 +331,7 @@ class BinaryNode extends Node {
 
       case BinaryNodeType.DIVISION:
         if (r == Decimal.zero) {
-          throw CalculatorException("Division By Zero");
+          throw const CalculatorException("Division By Zero");
         }
         return (l / r).toDecimal(scaleOnInfinitePrecision: 128);
     }

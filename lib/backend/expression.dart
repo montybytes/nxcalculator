@@ -79,13 +79,13 @@ class MathEngine {
   }
 
   ParseResult _parseTerm(int index) {
-    var left = _parsePower(index);
+    var left = _parseUnary(index);
 
     while (left.next < _tokens.length) {
       final op = _tokens[left.next];
 
       if (op == "*" || op == "/") {
-        final right = _parsePower(left.next + 1);
+        final right = _parseUnary(left.next + 1);
 
         left = ParseResult(
           node: BinaryNode(
@@ -100,7 +100,7 @@ class MathEngine {
       } else if (op == "%") {
         if (left.next + 1 < _tokens.length &&
             _isFactorStarter(_tokens[left.next + 1])) {
-          final right = _parsePower(left.next + 1);
+          final right = _parseUnary(left.next + 1);
           left = ParseResult(
             node: PercentNode(value: right.node, base: left.node),
             next: right.next,
@@ -130,10 +130,10 @@ class MathEngine {
   }
 
   ParseResult _parsePower(int index) {
-    final left = _parseFactor(index);
+    final left = _parsePostfix(index);
 
     if (left.next < _tokens.length && _tokens[left.next] == "^") {
-      final right = _parsePower(left.next + 1);
+      final right = _parseUnary(left.next + 1);
       return ParseResult(
         node: BinaryNode(
           type: BinaryNodeType.POWER,
@@ -147,8 +147,8 @@ class MathEngine {
     return left;
   }
 
-  ParseResult _parseFactor(int index) {
-    var result = _parseUnary(index);
+  ParseResult _parsePostfix(int index) {
+    var result = _parsePrimary(index);
 
     while (result.next < _tokens.length && _tokens[result.next] == "!") {
       result = ParseResult(
@@ -156,29 +156,32 @@ class MathEngine {
         next: result.next + 1,
       );
     }
-
     return result;
   }
 
   ParseResult _parseUnary(int index) {
     if (index >= _tokens.length) {
-      throw CalculatorException("Format Error");
+      throw const FormatException("Format Error");
     }
 
     final token = _tokens[index];
 
     if (_isUnaryOperator(token)) {
-      final result = _parseFactor(index + 1);
+      final result = _parsePower(index + 1);
       return ParseResult(
         node: UnaryNode(type: _mapUnary(token), operand: result.node),
         next: result.next,
       );
     }
 
-    return _parsePrimary(index);
+    return _parsePower(index);
   }
 
   ParseResult _parsePrimary(int index) {
+    if (index >= _tokens.length) {
+      throw const FormatException("Format Error");
+    }
+
     final token = _tokens[index];
 
     if (token == "(") {
