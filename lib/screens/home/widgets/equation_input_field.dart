@@ -64,6 +64,8 @@ class _EquationInputFieldState extends State<EquationInputField> {
       selection: selection,
     );
 
+    _editableKey.currentState?.hideToolbar();
+
     if (!selection.isValid || selection.baseOffset == currentEquation.length) {
       _scrollController.jumpTo(0);
     }
@@ -85,7 +87,7 @@ class _EquationInputFieldState extends State<EquationInputField> {
 
         return LayoutBuilder(
           builder: (context, constraints) {
-            final maxWidth = constraints.maxWidth;
+            final maxWidth = constraints.maxWidth - 24;
             final displayText = _getFormattedEquation();
             final chosenSize = maxWidth.isInfinite || maxWidth <= 0
                 ? widget.minFontSize
@@ -116,7 +118,24 @@ class _EquationInputFieldState extends State<EquationInputField> {
                 selectionColor: NxColors.nothingRed,
                 backgroundCursorColor: NxColors.nothingRed,
                 keyboardType: TextInputType.none,
-                selectionControls: CalculatorSelectionControls(),
+                selectionControls: CalculatorSelectionControls(
+                  onMessage: (message) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      // TODO: update theme with snackbar theme
+                      const SnackBar(
+                        content: Center(child: Text("Pasted value too large!")),
+                        behavior: SnackBarBehavior.floating,
+                        margin: EdgeInsets.symmetric(
+                          horizontal: 96,
+                          vertical: 20,
+                        ),
+                        duration: Duration(milliseconds: 1500),
+                        shape: StadiumBorder(),
+                        elevation: 0,
+                      ),
+                    );
+                  },
+                ),
                 scrollPhysics: const NeverScrollableScrollPhysics(),
                 style: DefaultTextStyle.of(context).style.copyWith(
                   height: 1,
@@ -231,6 +250,10 @@ class _EquationInputFieldState extends State<EquationInputField> {
 }
 
 class CalculatorSelectionControls extends MaterialTextSelectionControls {
+  CalculatorSelectionControls({this.onMessage});
+
+  final Function(String message)? onMessage;
+
   @override
   bool canCut(TextSelectionDelegate delegate) {
     final selection = delegate.textEditingValue.selection;
@@ -301,6 +324,10 @@ class CalculatorSelectionControls extends MaterialTextSelectionControls {
     final data = await Clipboard.getData("text/plain");
 
     if (data != null && data.text != null) {
+      if (data.text!.length > 500) {
+        onMessage?.call("Could not paste, data too large");
+        return;
+      }
       final value = delegate.textEditingValue;
       final selection = value.selection;
 
