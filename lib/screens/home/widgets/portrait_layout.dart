@@ -21,7 +21,6 @@ class PortraitLayout extends StatefulWidget {
 }
 
 class _PortraitLayoutState extends State<PortraitLayout> {
-  final focusNode = FocusNode();
   var _isExtended = false;
 
   SettingsRepository get _settings => context.read<SettingsRepository>();
@@ -32,7 +31,6 @@ class _PortraitLayoutState extends State<PortraitLayout> {
   @override
   void initState() {
     super.initState();
-    focusNode.requestFocus();
     _isExtended = _settings.get(startExtendedSetting);
   }
 
@@ -88,11 +86,9 @@ class _PortraitLayoutState extends State<PortraitLayout> {
                       return Padding(
                         padding: _getNumpadDensity(),
                         child: EquationInputField(
-                          clip: false,
                           maxFontSize: 72,
                           minFontSize: 38,
-                          focusNode: focusNode,
-                          style: const TextStyle(height: 1),
+                          cursor: repo.cursor,
                           equation: repo.equation,
                           onSelectionChanged: (cursorPosition) {
                             repo.setCursorFromCharOffset(cursorPosition);
@@ -132,7 +128,7 @@ class _PortraitLayoutState extends State<PortraitLayout> {
                             ),
                             letterSpacing:
                                 _settings.get(equationResultFontSetting) ==
-                                    NxFonts.fontLetteraMono
+                                    NxFonts.fontLettera
                                 ? -7
                                 : null,
                           ),

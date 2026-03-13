@@ -6,21 +6,21 @@ import "package:nxcalculator/backend/nodes.dart";
 import "package:nxcalculator/models/history_item.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
-/* 
-  Rules of this calculator (implied & hard-coded)
-  1. The percantage operator is applied only to the last token
-  2. If the last token is a closing bracket, the percentage operator applies to
-      computed value of the grouping
-  3. Implicit multiplication is applied when a digit/function is placed next to 
-      another function/symbol
-  4. Operators cannot be chained except if the leading operator is the percentage 
-      operator
-  5. Closing brackets are automatically placed at the end of the equation if none 
-      are supplied
-  6. One can only apply a square to a number/constant once
-*/
-
 const calculatorHistoryKey = "calculator_history";
+
+const multiCharTokens = [
+  "arcsin",
+  "arccos",
+  "arctan",
+  "sin",
+  "cos",
+  "tan",
+  "ln",
+  "log",
+  "exp",
+  "sqrt",
+  "²",
+];
 
 // TODO: add comments
 class CalculatorRepository with ChangeNotifier {
@@ -50,7 +50,7 @@ class CalculatorRepository with ChangeNotifier {
       s == "+" || s == "-" || s == "÷" || s == "×" || s == "^";
 
   bool _isImpliedValue(String s) =>
-      _isNumber(s) || _isConstant(s) || s == "!" || s == ")" || s == "^2";
+      _isNumber(s) || _isConstant(s) || s == "!" || s == ")" || s == "²";
 
   bool _isLeadingValue(String s) =>
       _isNumber(s) || _isConstant(s) || s.endsWith("(");
@@ -130,6 +130,75 @@ class CalculatorRepository with ChangeNotifier {
 
     cursor = equation.length;
     notifyListeners();
+  }
+
+  List<String> parseTokens(String input) {
+    final tokens = <String>[];
+
+    var i = 0;
+
+    bool isSuperscript(String s) => "⁰¹²³⁴⁵⁶⁷⁸⁹".contains(s);
+    String toRegularDigit(String s) {
+      const map = {
+        "⁰": "0",
+        "¹": "1",
+        "²": "2",
+        "³": "3",
+        "⁴": "4",
+        "⁵": "5",
+        "⁶": "6",
+        "⁷": "7",
+        "⁸": "8",
+        "⁹": "9",
+      };
+      return map[s] ?? s;
+    }
+
+    while (i < input.length) {
+      if (input[i] == " ") {
+        i++;
+        continue;
+      }
+
+      final remaining = input.substring(i);
+      final multiCharMatch = multiCharTokens.firstWhere(
+        (token) => remaining.startsWith(token),
+        orElse: () => "",
+      );
+
+      if (multiCharMatch.isNotEmpty) {
+        tokens.add(multiCharMatch);
+        i += multiCharMatch.length;
+        continue;
+      }
+
+      final char = input[i];
+
+      if (isSuperscript(char) && char != "²") {
+        final powerChars = <String>[];
+
+        while (i < input.length) {
+          if (isSuperscript(input[i])) {
+            powerChars.add(input[i]);
+            i++;
+            continue;
+          }
+          break;
+        }
+
+        final regularDigits = powerChars.map(toRegularDigit);
+        tokens.add("^");
+        for (final digit in regularDigits) {
+          tokens.add(digit);
+        }
+        continue;
+      }
+
+      tokens.add(char);
+      i++;
+    }
+
+    return tokens;
   }
 
   /*
@@ -242,10 +311,10 @@ class CalculatorRepository with ChangeNotifier {
           final prev = equation[cursor - 1];
 
           if (_isNumber(prev) || _isConstant(prev) || prev == ")") {
-            insertToken("^2");
+            insertToken("²");
           }
         } else {
-          insertToken("sqrt");
+          insertToken("sqrt(");
         }
       default:
     }
@@ -446,7 +515,7 @@ class CalculatorRepository with ChangeNotifier {
           buffer.add("*");
         case "π":
           buffer.add("pi");
-        case "^2":
+        case "²":
           buffer.add("^");
           buffer.add("2");
         case "10^(":

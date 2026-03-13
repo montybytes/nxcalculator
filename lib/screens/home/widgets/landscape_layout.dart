@@ -21,8 +21,6 @@ class LandscapeLayout extends StatefulWidget {
 }
 
 class _LandscapeLayoutState extends State<LandscapeLayout> {
-  final focusNode = FocusNode();
-
   var _collapsed = true;
 
   CalculatorRepository get _calculator => context.read<CalculatorRepository>();
@@ -33,7 +31,6 @@ class _LandscapeLayoutState extends State<LandscapeLayout> {
   @override
   void initState() {
     super.initState();
-    focusNode.requestFocus();
   }
 
   @override
@@ -143,11 +140,10 @@ class _LandscapeLayoutState extends State<LandscapeLayout> {
                   Consumer<CalculatorRepository>(
                     builder: (context, repo, child) {
                       return EquationInputField(
-                        equation: repo.equation,
                         maxFontSize: 44,
                         minFontSize: 44,
-                        focusNode: focusNode,
-                        style: const TextStyle(height: 1),
+                        cursor: repo.cursor,
+                        equation: repo.equation,
                         onSelectionChanged: (cursorPosition) {
                           repo.setCursorFromCharOffset(cursorPosition);
                         },
@@ -177,7 +173,7 @@ class _LandscapeLayoutState extends State<LandscapeLayout> {
                           fontFamily: _settings.get(equationResultFontSetting),
                           letterSpacing:
                               _settings.get(equationResultFontSetting) ==
-                                  NxFonts.fontLetteraMono
+                                  NxFonts.fontLettera
                               ? -6
                               : null,
                         ),

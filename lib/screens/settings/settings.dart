@@ -207,7 +207,7 @@ class SettingsScreen extends StatelessWidget {
             children:
                 [
                   NxFonts.fontInter,
-                  NxFonts.fontLetteraMono,
+                  NxFonts.fontLettera,
                   NxFonts.fontNDot,
                   NxFonts.fontNType,
                 ].map((font) {

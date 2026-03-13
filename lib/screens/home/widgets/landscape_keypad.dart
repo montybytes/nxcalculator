@@ -6,7 +6,6 @@ import "package:nxcalculator/registries/settings.dart";
 import "package:nxcalculator/repositories/calculator.dart";
 import "package:nxcalculator/repositories/settings.dart";
 import "package:nxcalculator/utils/strings.dart";
-import "package:nxcalculator/utils/ui.dart";
 import "package:nxdesign/colors.dart";
 import "package:nxdesign/fonts.dart";
 import "package:provider/provider.dart";
@@ -53,7 +52,7 @@ class _LandscapeKeypadState extends State<LandscapeKeypad> {
 
   Map<String, String> get _keypadValues => {
     "{mode}": widget.mode,
-    "{root}": widget.isInverted ? "x" : "√",
+    "{root}": widget.isInverted ? "x²" : "√",
     "{pi}": "π",
     "{digit_7}": "7",
     "{digit_8}": "8",
@@ -77,8 +76,8 @@ class _LandscapeKeypadState extends State<LandscapeKeypad> {
     "{add}": "+",
     "{subtract}": "-",
     "{euler}": "e",
-    "{ln}": widget.isInverted ? "e" : "ln(",
-    "{log}": widget.isInverted ? "10" : "log(",
+    "{ln}": widget.isInverted ? "eˣ" : "ln(",
+    "{log}": widget.isInverted ? "10ˣ" : "log(",
     "{decimal}": mapDecimalSeparator(_settings.get(decimalSeparatorSetting)),
     "{digit_0}": "0",
     "{percent}": "%",
@@ -153,16 +152,16 @@ class _LandscapeKeypadState extends State<LandscapeKeypad> {
     }
 
     return switch (buttonKey) {
-      "{divide}" when font == NxFonts.fontNType => NxFonts.fontLetteraMono,
-      "{multiply}" when font == NxFonts.fontNType => NxFonts.fontLetteraMono,
-      "{subtract}" when font == NxFonts.fontNType => NxFonts.fontLetteraMono,
-      "{add}" when font == NxFonts.fontNType => NxFonts.fontLetteraMono,
-      "{equals}" when font == NxFonts.fontNType => NxFonts.fontLetteraMono,
-      "{pi}" when font == NxFonts.fontNType => NxFonts.fontLetteraMono,
-      "{power}" when font == NxFonts.fontNType => NxFonts.fontLetteraMono,
+      "{divide}" when font == NxFonts.fontNType => NxFonts.fontLettera,
+      "{multiply}" when font == NxFonts.fontNType => NxFonts.fontLettera,
+      "{subtract}" when font == NxFonts.fontNType => NxFonts.fontLettera,
+      "{add}" when font == NxFonts.fontNType => NxFonts.fontLettera,
+      "{equals}" when font == NxFonts.fontNType => NxFonts.fontLettera,
+      "{pi}" when font == NxFonts.fontNType => NxFonts.fontLettera,
+      "{power}" when font == NxFonts.fontNType => NxFonts.fontLettera,
       "{root}" when font == NxFonts.fontNType && !widget.isInverted =>
-        NxFonts.fontLetteraMono,
-      "{factorial}" when font == NxFonts.fontNType => NxFonts.fontLetteraMono,
+        NxFonts.fontLettera,
+      "{factorial}" when font == NxFonts.fontNType => NxFonts.fontLettera,
       _ => font,
     };
   }
@@ -297,35 +296,28 @@ class _LandscapeKeypadState extends State<LandscapeKeypad> {
     final style = TextStyle(
       fontSize: fontSize,
       fontFamily: font,
-      letterSpacing: font == NxFonts.fontLetteraMono ? -4 : 0,
+      letterSpacing: font == NxFonts.fontLettera ? -4 : 0,
       color: _isDark ? NxColors.darkThemeText : NxColors.lightThemeText,
     );
 
+    final text = _keypadValues[buttonKey]
+        ?.replaceAll("arc", "")
+        .replaceAll("(", "");
+
     final superText = switch (buttonKey) {
-      "{root}" when widget.isInverted => "2",
-      "{sin}" when widget.isInverted => "-1",
-      "{cos}" when widget.isInverted => "-1",
-      "{tan}" when widget.isInverted => "-1",
-      "{log}" when widget.isInverted => "x",
-      "{ln}" when widget.isInverted => "x",
+      "{sin}" when widget.isInverted => "⁻¹",
+      "{cos}" when widget.isInverted => "⁻¹",
+      "{tan}" when widget.isInverted => "⁻¹",
       _ => "",
     };
 
-    return RichText(
-      strutStyle: StrutStyle(fontSize: fontSize, forceStrutHeight: true),
+    final displayText = "$text$superText";
+
+    return Text(
+      displayText,
+      style: style,
+      strutStyle: StrutStyle(fontSize: style.fontSize, forceStrutHeight: true),
       textAlign: TextAlign.center,
-      text: TextSpan(
-        style: style,
-        children: [
-          TextSpan(
-            text: _keypadValues[buttonKey]
-                ?.replaceAll("arc", "")
-                .replaceAll("(", ""),
-          ),
-          if (superText.isNotEmpty)
-            superscript(superText, fontSize: 16, family: style.fontFamily),
-        ],
-      ),
     );
   }
 

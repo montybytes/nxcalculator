@@ -6,7 +6,6 @@ import "package:nxcalculator/models/setting.dart";
 import "package:nxcalculator/registries/settings.dart";
 import "package:nxcalculator/repositories/settings.dart";
 import "package:nxcalculator/utils/strings.dart";
-import "package:nxcalculator/utils/ui.dart";
 import "package:nxdesign/colors.dart";
 import "package:nxdesign/fonts.dart";
 import "package:provider/provider.dart";
@@ -80,7 +79,7 @@ class _PortraitKeypadState extends State<PortraitKeypad> {
 
   Map<String, String> get _extendedKeypadValues {
     return {
-      "{root}": widget.isInverted ? "x" : "√",
+      "{root}": widget.isInverted ? "x²" : "√",
       "{pi}": "π",
       "{power}": "^",
       "{factorial}": "!",
@@ -90,8 +89,8 @@ class _PortraitKeypadState extends State<PortraitKeypad> {
       "{tan}": widget.isInverted ? "arctan(" : "tan(",
       "{invert}": "INV",
       "{euler}": "e",
-      "{ln}": widget.isInverted ? "e" : "ln(",
-      "{log}": widget.isInverted ? "10" : "log(",
+      "{ln}": widget.isInverted ? "eˣ" : "ln(",
+      "{log}": widget.isInverted ? "10ˣ" : "log(",
     };
   }
 
@@ -201,16 +200,16 @@ class _PortraitKeypadState extends State<PortraitKeypad> {
     }
 
     return switch (buttonKey) {
-      "{divide}" when font == NxFonts.fontNType => NxFonts.fontLetteraMono,
-      "{multiply}" when font == NxFonts.fontNType => NxFonts.fontLetteraMono,
-      "{subtract}" when font == NxFonts.fontNType => NxFonts.fontLetteraMono,
-      "{add}" when font == NxFonts.fontNType => NxFonts.fontLetteraMono,
-      "{equals}" when font == NxFonts.fontNType => NxFonts.fontLetteraMono,
-      "{pi}" when font == NxFonts.fontNType => NxFonts.fontLetteraMono,
-      "{power}" when font == NxFonts.fontNType => NxFonts.fontLetteraMono,
+      "{divide}" when font == NxFonts.fontNType => NxFonts.fontLettera,
+      "{multiply}" when font == NxFonts.fontNType => NxFonts.fontLettera,
+      "{subtract}" when font == NxFonts.fontNType => NxFonts.fontLettera,
+      "{add}" when font == NxFonts.fontNType => NxFonts.fontLettera,
+      "{equals}" when font == NxFonts.fontNType => NxFonts.fontLettera,
+      "{pi}" when font == NxFonts.fontNType => NxFonts.fontLettera,
+      "{power}" when font == NxFonts.fontNType => NxFonts.fontLettera,
       "{root}" when font == NxFonts.fontNType && !widget.isInverted =>
-        NxFonts.fontLetteraMono,
-      "{factorial}" when font == NxFonts.fontNType => NxFonts.fontLetteraMono,
+        NxFonts.fontLettera,
+      "{factorial}" when font == NxFonts.fontNType => NxFonts.fontLettera,
       _ => font,
     };
   }
@@ -283,13 +282,13 @@ class _PortraitKeypadState extends State<PortraitKeypad> {
 
   Widget _getButtonWidget(String buttonKey) {
     switch (buttonKey) {
-      case "{ln}":
-      case "{log}":
-      case "{root}":
       case "{sin}":
       case "{cos}":
       case "{tan}":
         return _getRichTextWidget(buttonKey);
+      case "{ln}":
+      case "{log}":
+      case "{root}":
       case "{invert}":
       case "{mode}":
       case "{pi}":
@@ -355,36 +354,29 @@ class _PortraitKeypadState extends State<PortraitKeypad> {
     final font = _getButtonFont(buttonKey);
 
     final style = TextStyle(
-      fontSize: font == NxFonts.fontLetteraMono ? 20 : 24,
       fontFamily: font,
+      fontSize: font == NxFonts.fontLettera ? 20 : 24,
       color: _isDark ? NxColors.darkThemeText : NxColors.lightThemeText,
     );
 
+    final text = _extendedKeypadValues[buttonKey]
+        ?.replaceAll("arc", "")
+        .replaceAll("(", "");
+
     final superText = switch (buttonKey) {
-      "{root}" when widget.isInverted => "2",
-      "{sin}" when widget.isInverted => "-1",
-      "{cos}" when widget.isInverted => "-1",
-      "{tan}" when widget.isInverted => "-1",
-      "{log}" when widget.isInverted => "x",
-      "{ln}" when widget.isInverted => "x",
+      "{sin}" when widget.isInverted => "⁻¹",
+      "{cos}" when widget.isInverted => "⁻¹",
+      "{tan}" when widget.isInverted => "⁻¹",
       _ => "",
     };
 
-    return RichText(
-      strutStyle: const StrutStyle(fontSize: 24, forceStrutHeight: true),
+    final displayText = "$text$superText";
+
+    return Text(
+      displayText,
+      style: style,
+      strutStyle: StrutStyle(fontSize: style.fontSize, forceStrutHeight: true),
       textAlign: TextAlign.center,
-      text: TextSpan(
-        style: style,
-        children: [
-          TextSpan(
-            text: _extendedKeypadValues[buttonKey]
-                ?.replaceAll("arc", "")
-                .replaceAll("(", ""),
-          ),
-          if (superText.isNotEmpty)
-            superscript(superText, fontSize: 20, family: style.fontFamily),
-        ],
-      ),
     );
   }
 
