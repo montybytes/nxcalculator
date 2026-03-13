@@ -80,6 +80,7 @@ class MathEngine {
           ),
           next: right.next,
         );
+        continue;
       }
       break;
     }
@@ -106,6 +107,7 @@ class MathEngine {
           ),
           next: right.next,
         );
+        continue;
       } else if (op == "%") {
         if (left.next + 1 < _tokens.length &&
             _isFactorStarter(_tokens[left.next + 1])) {
