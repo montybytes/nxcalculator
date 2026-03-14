@@ -145,12 +145,9 @@ class _EquationInputFieldState extends State<EquationInputField> {
                 ),
                 onChanged: (value) {
                   if (value.isEmpty) {
+                    calculator.clear();
                     return;
                   }
-
-                  final prevLength = widget.equation.join().length;
-                  final currLength = value.length;
-                  final isPasted = prevLength < currLength;
 
                   final newTokens = calculator.parseTokens(value);
 
@@ -159,21 +156,6 @@ class _EquationInputFieldState extends State<EquationInputField> {
                   for (final token in newTokens) {
                     calculator.insertToken(token);
                   }
-
-                  final newEquation = calculator.equation.join();
-
-                  var cursor = widget.cursor;
-
-                  if (isPasted) {
-                    cursor =
-                        widget.equation.length -
-                        (widget.equation.length - cursor);
-                  }
-
-                  _textController.value = TextEditingValue(
-                    text: newEquation,
-                    selection: TextSelection.collapsed(offset: cursor),
-                  );
                 },
                 onSelectionHandleTapped: () {
                   _editableKey.currentState?.showToolbar();
