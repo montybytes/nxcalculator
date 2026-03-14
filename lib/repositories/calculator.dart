@@ -134,72 +134,37 @@ class CalculatorRepository with ChangeNotifier {
   }
 
   List<String> parseTokens(String input) {
-    final tokens = <String>[];
+    const supers = "⁰¹²³⁴⁵⁶⁷⁸⁹";
 
-    var i = 0;
+    input = input.replaceAll("*", "×").replaceAll("/", "÷");
 
-    bool isSuperscript(String s) => "⁰¹²³⁴⁵⁶⁷⁸⁹".contains(s);
-    String toRegularDigit(String s) {
-      const map = {
-        "⁰": "0",
-        "¹": "1",
-        "²": "2",
-        "³": "3",
-        "⁴": "4",
-        "⁵": "5",
-        "⁶": "6",
-        "⁷": "7",
-        "⁸": "8",
-        "⁹": "9",
-      };
-      return map[s] ?? s;
-    }
+    final normalized = input.replaceAllMapped(RegExp("[⁰¹²³⁴⁵⁶⁷⁸⁹]+"), (match) {
+      final seq = match.group(0)!;
 
-    while (i < input.length) {
-      if (input[i] == " ") {
-        i++;
-        continue;
+      if (seq == "²") {
+        return "²";
       }
 
-      final remaining = input.substring(i);
-      final multiCharMatch = multiCharTokens.firstWhere(
-        (token) => remaining.startsWith(token),
-        orElse: () => "",
-      );
+      final digits = seq.split("").map((char) => supers.indexOf(char)).join();
 
-      if (multiCharMatch.isNotEmpty) {
-        tokens.add(multiCharMatch);
-        i += multiCharMatch.length;
-        continue;
-      }
+      return "^$digits";
+    });
 
-      final char = input[i];
+    final keyWords = multiCharTokens.map((s) => RegExp.escape(s)).join("|");
 
-      if (isSuperscript(char) && char != "²") {
-        final powerChars = <String>[];
+    final regex = RegExp(
+      "[0-9]+(?:[., ][0-9]+)*(?:[E][+-]?[0-9]+)?"
+      "|$keyWords"
+      "|[a-zA-Z]"
+      "|[+\\-×÷^!%()]"
+      "|π"
+      "|²",
+    );
 
-        while (i < input.length) {
-          if (isSuperscript(input[i])) {
-            powerChars.add(input[i]);
-            i++;
-            continue;
-          }
-          break;
-        }
-
-        final regularDigits = powerChars.map(toRegularDigit);
-        tokens.add("^");
-        for (final digit in regularDigits) {
-          tokens.add(digit);
-        }
-        continue;
-      }
-
-      tokens.add(char);
-      i++;
-    }
-
-    return tokens;
+    return regex
+        .allMatches(normalized)
+        .map((match) => match.group(0)!)
+        .toList();
   }
 
   /*

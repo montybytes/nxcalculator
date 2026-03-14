@@ -169,27 +169,6 @@ String getSystemGroupingSeparator() {
   return symbols.GROUP_SEP;
 }
 
-String _getFormattedNumber(
-  String number, {
-  GroupingSeparator? groupingSep,
-  DecimalSeparator? decimalSep,
-}) {
-  final parts = number.split(".");
-
-  final gSep = mapGroupingSeparator(groupingSep);
-  final dSep = mapDecimalSeparator(decimalSep);
-
-  if (parts.length > 1) {
-    return "${parts[0].replaceAll(",", gSep)}$dSep${parts[1]}";
-  }
-
-  if (parts.length == 1 && parts[0].contains(",")) {
-    return parts[0].replaceAll(",", gSep);
-  }
-
-  return number;
-}
-
 String mapGroupingSeparator(GroupingSeparator? separator) {
   switch (separator) {
     case GroupingSeparator.comma:
@@ -212,4 +191,25 @@ String mapDecimalSeparator(DecimalSeparator? separator) {
     default:
       return getSystemDecimalSeparator();
   }
+}
+
+String _getFormattedNumber(
+  String number, {
+  GroupingSeparator? groupingSep,
+  DecimalSeparator? decimalSep,
+}) {
+  final parts = number.split(".");
+
+  final gSep = mapGroupingSeparator(groupingSep);
+  final dSep = mapDecimalSeparator(decimalSep);
+
+  if (parts.length > 1) {
+    return "${parts[0].replaceAll(",", gSep)}$dSep${parts[1]}";
+  }
+
+  if (parts.length == 1 && parts[0].contains(",")) {
+    return parts[0].replaceAll(",", gSep);
+  }
+
+  return number;
 }

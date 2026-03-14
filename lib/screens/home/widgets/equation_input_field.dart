@@ -6,6 +6,7 @@ import "package:nxcalculator/repositories/settings.dart";
 import "package:nxcalculator/utils/strings.dart";
 import "package:nxdesign/colors.dart";
 import "package:nxdesign/fonts.dart";
+import "package:nxdesign/widgets.dart";
 import "package:provider/provider.dart";
 
 class EquationInputField extends StatefulWidget {
@@ -123,15 +124,24 @@ class _EquationInputFieldState extends State<EquationInputField> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       // TODO: update theme with snackbar theme
                       const SnackBar(
-                        content: Center(child: Text("Pasted value too large!")),
-                        behavior: SnackBarBehavior.floating,
-                        margin: EdgeInsets.symmetric(
-                          horizontal: 96,
-                          vertical: 20,
-                        ),
-                        duration: Duration(milliseconds: 1500),
-                        shape: StadiumBorder(),
                         elevation: 0,
+                        shape: StadiumBorder(),
+                        behavior: SnackBarBehavior.floating,
+                        backgroundColor: NxColors.nothingRed,
+                        duration: Duration(milliseconds: 1500),
+                        margin: EdgeInsets.fromLTRB(80, 0, 80, 18),
+                        content: Center(
+                          child: Row(
+                            spacing: 8,
+                            children: [
+                              NxIcon(path: NxIcon.block),
+                              Text(
+                                "Pasted value too large!",
+                                style: TextStyle(color: NxColors.darkThemeText),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     );
                   },
@@ -148,13 +158,32 @@ class _EquationInputFieldState extends State<EquationInputField> {
                     calculator.clear();
                     return;
                   }
-
                   final newTokens = calculator.parseTokens(value);
 
                   calculator.clear();
 
+                  String normalizeToken(String token) {
+                    token = token.trim().replaceAll(" ", "");
+
+                    final groupSep = mapGroupingSeparator(
+                      settings.get(groupingSeparatorSetting),
+                    );
+                    final decimalSep = mapDecimalSeparator(
+                      settings.get(decimalSeparatorSetting),
+                    );
+
+                    final split = token.split("E");
+                    var mantissa = split[0];
+                    final exp = split.length > 1 ? split[1] : "";
+
+                    mantissa = mantissa.replaceAll(groupSep, "");
+                    mantissa = mantissa.replaceAll(decimalSep, ".");
+
+                    return exp.isEmpty ? mantissa : "${mantissa}E$exp";
+                  }
+
                   for (final token in newTokens) {
-                    calculator.insertToken(token);
+                    calculator.insertToken(normalizeToken(token));
                   }
                 },
                 onSelectionHandleTapped: () {
@@ -189,7 +218,7 @@ class _EquationInputFieldState extends State<EquationInputField> {
           text: text,
           style: TextStyle(fontFamily: font, fontSize: fontSize),
         ),
-        textDirection: TextDirection.ltr,
+        textDirection: Directionality.of(context),
         maxLines: 1,
       );
       tp.layout();
