@@ -31,8 +31,8 @@ void main() {
       final difference = engine.parse(["10", "-", "2"]);
       expect(engine.evaluate(difference), Decimal.parse("8.0"));
 
-      final multiple = engine.parse(["10", "*", "2"]);
-      expect(engine.evaluate(multiple), Decimal.parse("20.0"));
+      final multiple = engine.parse(["10", "*", "2", "/", "2"]);
+      expect(engine.evaluate(multiple), Decimal.parse("10.0"));
 
       final division = engine.parse(["10", "/", "2"]);
       expect(engine.evaluate(division), Decimal.parse("5.0"));
@@ -63,7 +63,7 @@ void main() {
     });
 
     test("trigonometric operations (with mode switch)", () {
-      final degrees = engine.parse(["sin", "(", "30"]);
+      final degrees = engine.parse(["sin", "30"]);
       expect(
         engine.evaluate(degrees, mode: MathMode.DEGREES),
         Decimal.parse("0.5"),
@@ -175,10 +175,23 @@ void main() {
 
     test("custom error message", () {
       try {
-        throw CalculatorException("Custom Error");
+        throw const CalculatorException("Custom Error");
       } on CalculatorException catch (e) {
         expect(e.message, "Custom Error");
         expect(e.toString(), "MathEngine Exception: Custom Error");
+      }
+    });
+
+    test("trailing operator", () {
+      try {
+        engine.parse(["2", "+"]);
+      } on FormatException catch (e) {
+        expect(e.message, "Format Error");
+      }
+      try {
+        engine.parse(["2", "/"]);
+      } on FormatException catch (e) {
+        expect(e.message, "Format Error");
       }
     });
 
@@ -188,6 +201,15 @@ void main() {
         engine.evaluate(expression);
       } on CalculatorException catch (e) {
         expect(e.message, "Division By Zero");
+      }
+    });
+
+    test("imaginary number", () {
+      final expression = engine.parse(["sqrt", "(", "-", "1"]);
+      try {
+        engine.evaluate(expression);
+      } on CalculatorException catch (e) {
+        expect(e.message, "Imaginary Number");
       }
     });
 
@@ -228,7 +250,7 @@ void main() {
     });
 
     test("square root of negative", () {
-      final root = engine.parse(["sqrt", "-", "1"]);
+      final root = engine.parse(["sqrt", "(", "-", "1"]);
       try {
         engine.evaluate(root);
       } on CalculatorException catch (e) {

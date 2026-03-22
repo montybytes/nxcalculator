@@ -120,7 +120,7 @@ void main() {
       expect(repo.equation, []);
       repo.addDigit("2");
       repo.addFunction("{root}");
-      expect(repo.equation, ["2", "^2"]);
+      expect(repo.equation, ["2", "²"]);
       repo.clear();
 
       repo.addFunction("{unknown}");

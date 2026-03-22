@@ -1,4 +1,3 @@
-
 import "package:flutter/material.dart";
 import "package:nxcalculator/models/setting.dart";
 import "package:nxcalculator/registries/settings.dart";
@@ -11,8 +10,8 @@ class SettingsRepository with ChangeNotifier {
   final Map<String, dynamic> _cache = {};
 
   bool get hasSameSeparators {
-    return mapDecimalSeparator(get(decimalSeparatorSetting)) ==
-        mapGroupingSeparator(get(groupingSeparatorSetting));
+    return mapDecimalSeparator(get(decimalSeparator)) ==
+        mapGroupingSeparator(get(groupingSeparator));
   }
 
   Future<void> load() async {
@@ -26,7 +25,7 @@ class SettingsRepository with ChangeNotifier {
     final Map<String, List<Setting>> grouped = {};
 
     for (final setting in allSettings) {
-      grouped.putIfAbsent(setting.category, () => []).add(setting);
+      grouped.putIfAbsent(setting.category.text, () => []).add(setting);
     }
 
     return grouped;

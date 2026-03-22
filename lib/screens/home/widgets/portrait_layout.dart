@@ -4,12 +4,14 @@ import "package:nxcalculator/models/setting.dart";
 import "package:nxcalculator/registries/settings.dart";
 import "package:nxcalculator/repositories/calculator.dart";
 import "package:nxcalculator/repositories/settings.dart";
-import "package:nxcalculator/theme/constants.dart";
 import "package:nxcalculator/screens/home/widgets/equation_input_field.dart";
 import "package:nxcalculator/utils/strings.dart";
 import "package:nxcalculator/screens/home/widgets/dynamic_appbar.dart";
 import "package:nxcalculator/screens/home/widgets/history_listview.dart";
 import "package:nxcalculator/screens/home/widgets/portrait_keypad.dart";
+import "package:nxdesign/colors.dart";
+import "package:nxdesign/fonts.dart";
+import "package:nxdesign/widgets.dart";
 import "package:provider/provider.dart";
 
 class PortraitLayout extends StatefulWidget {
@@ -20,19 +22,15 @@ class PortraitLayout extends StatefulWidget {
 }
 
 class _PortraitLayoutState extends State<PortraitLayout> {
-  final focusNode = FocusNode();
   var _isExtended = false;
 
   SettingsRepository get _settings => context.read<SettingsRepository>();
   CalculatorRepository get _calculator => context.read<CalculatorRepository>();
 
-  bool get _isDark => Theme.of(context).brightness == Brightness.dark;
-
   @override
   void initState() {
     super.initState();
-    focusNode.requestFocus();
-    _isExtended = _settings.get(startExtendedSetting);
+    _isExtended = _settings.get(startExtended);
   }
 
   @override
@@ -44,30 +42,27 @@ class _PortraitLayoutState extends State<PortraitLayout> {
             DynamicAppbar(
               padding: const EdgeInsets.only(left: 24),
               actions: [
-                if (settings.get(preferBottomToolbarSetting) == false &&
-                    settings.get(swipeUpHistorySetting) == false)
+                if (settings.get(preferBottomToolbar) == false &&
+                    settings.get(swipeUpHistory) == false)
                   IconButton(
                     tooltip: "History",
-                    icon: _isDark
-                        ? Image.asset("assets/icons/dark/history.png")
-                        : Image.asset("assets/icons/light/history.png"),
+                    icon: const NxIcon(path: NxIcon.history),
                     padding: const EdgeInsets.all(14),
                     onPressed: _showHistory,
                   ),
-                if (settings.get(preferBottomToolbarSetting) == false)
+                if (settings.get(preferBottomToolbar) == false)
                   IconButton(
                     tooltip: "Scientific",
                     icon: Container(
                       padding: const EdgeInsets.all(4),
                       decoration: BoxDecoration(
-                        color: _isExtended ? nothingRed : null,
+                        color: _isExtended ? NxColors.nothingRed : null,
                         shape: BoxShape.circle,
                       ),
-                      child: _isDark
-                          ? Image.asset("assets/icons/dark/function.png")
-                          : _isExtended
-                          ? Image.asset("assets/icons/dark/function.png")
-                          : Image.asset("assets/icons/light/function.png"),
+                      child: NxIcon(
+                        path: NxIcon.function,
+                        color: _isExtended ? NxColors.darkThemeText : null,
+                      ),
                     ),
                     padding: const EdgeInsets.all(10),
                     onPressed: () {
@@ -87,11 +82,9 @@ class _PortraitLayoutState extends State<PortraitLayout> {
                       return Padding(
                         padding: _getNumpadDensity(),
                         child: EquationInputField(
-                          clip: false,
                           maxFontSize: 72,
                           minFontSize: 38,
-                          focusNode: focusNode,
-                          style: const TextStyle(height: 1),
+                          cursor: repo.cursor,
                           equation: repo.equation,
                           onSelectionChanged: (cursorPosition) {
                             repo.setCursorFromCharOffset(cursorPosition);
@@ -100,13 +93,13 @@ class _PortraitLayoutState extends State<PortraitLayout> {
                       );
                     },
                   ),
-                  const SizedBox(height: 24),
+                  const Flexible(child: SizedBox(height: 24)),
                   Consumer<CalculatorRepository>(
                     builder: (context, repo, child) {
                       final text = repo.result == "" && repo.error != ""
                           ? repo.error
                           : !repo.isPureNumberExpression
-                          ? getFormattedResult(
+                          ? getFormattedToken(
                               repo.result,
                               maxIntegerDigits: 13,
                               maxFractionDigits: 13,
@@ -126,12 +119,10 @@ class _PortraitLayoutState extends State<PortraitLayout> {
                                 ? 38
                                 : 40,
                             color: Colors.grey[600],
-                            fontFamily: _settings.get(
-                              equationResultFontSetting,
-                            ),
+                            fontFamily: _settings.get(equationResultFont),
                             letterSpacing:
-                                _settings.get(equationResultFontSetting) ==
-                                    "LetteraMono"
+                                _settings.get(equationResultFont) ==
+                                    NxFonts.fontLettera
                                 ? -7
                                 : null,
                           ),
@@ -140,7 +131,7 @@ class _PortraitLayoutState extends State<PortraitLayout> {
                     },
                   ),
                   const Spacer(),
-                  settings.get(preferBottomToolbarSetting)
+                  settings.get(preferBottomToolbar)
                       ? SizedBox(
                           height: 56,
                           child: Padding(
@@ -152,20 +143,17 @@ class _PortraitLayoutState extends State<PortraitLayout> {
                                   icon: Container(
                                     padding: const EdgeInsets.all(4),
                                     decoration: BoxDecoration(
-                                      color: _isExtended ? nothingRed : null,
+                                      color: _isExtended
+                                          ? NxColors.nothingRed
+                                          : null,
                                       shape: BoxShape.circle,
                                     ),
-                                    child: _isDark
-                                        ? Image.asset(
-                                            "assets/icons/dark/function.png",
-                                          )
-                                        : _isExtended
-                                        ? Image.asset(
-                                            "assets/icons/dark/function.png",
-                                          )
-                                        : Image.asset(
-                                            "assets/icons/light/function.png",
-                                          ),
+                                    child: NxIcon(
+                                      path: NxIcon.function,
+                                      color: _isExtended
+                                          ? NxColors.darkThemeText
+                                          : null,
+                                    ),
                                   ),
                                   padding: const EdgeInsets.all(10),
                                   onPressed: () {
@@ -173,17 +161,10 @@ class _PortraitLayoutState extends State<PortraitLayout> {
                                   },
                                 ),
                                 const SizedBox(width: 16),
-                                if (settings.get(swipeUpHistorySetting) ==
-                                    false)
+                                if (settings.get(swipeUpHistory) == false)
                                   IconButton(
                                     tooltip: "History",
-                                    icon: _isDark
-                                        ? Image.asset(
-                                            "assets/icons/dark/history.png",
-                                          )
-                                        : Image.asset(
-                                            "assets/icons/light/history.png",
-                                          ),
+                                    icon: const NxIcon(path: NxIcon.history),
                                     padding: const EdgeInsets.all(14),
                                     onPressed: _showHistory,
                                   ),
@@ -192,14 +173,14 @@ class _PortraitLayoutState extends State<PortraitLayout> {
                           ),
                         )
                       : const SizedBox(height: 56),
-                  const SizedBox(height: 8),
+                  const Flexible(child: SizedBox(height: 8)),
                   Padding(
-                    padding: _getNumpadDensity(),
+                    padding: _getNumpadDensity().copyWith(bottom: 12),
                     child: Consumer<CalculatorRepository>(
                       builder: (context, repo, child) {
                         return GestureDetector(
                           onVerticalDragEnd: (details) async {
-                            if (_settings.get(swipeUpHistorySetting)) {
+                            if (_settings.get(swipeUpHistory)) {
                               if (details.primaryVelocity != null &&
                                   details.primaryVelocity! < -800) {
                                 await _showHistory();
@@ -268,7 +249,7 @@ class _PortraitLayoutState extends State<PortraitLayout> {
                               if (await _calculator.saveHistory(
                                 item,
                                 preventDuplicate: _settings.get(
-                                  preventDuplicateHistorySetting,
+                                  preventDuplicateHistory,
                                 ),
                               )) {
                                 _calculator.clear();
@@ -293,7 +274,6 @@ class _PortraitLayoutState extends State<PortraitLayout> {
                       },
                     ),
                   ),
-                  const SizedBox(height: 16),
                 ],
               ),
             ),
@@ -329,22 +309,13 @@ class _PortraitLayoutState extends State<PortraitLayout> {
 
     if (item != null) {
       _calculator.clear();
-      if (item.result.contains("E")) {
-        if (item.result.startsWith("-")) {
-          _calculator.addOperation("-");
-          _calculator.insertToken(item.result.substring(1));
-        } else {
-          _calculator.insertToken(item.result);
-        }
-      } else {
-        _calculator.insertToken(item.result);
-      }
+      _calculator.insertToken(item.result);
     }
   }
 
   EdgeInsets _getNumpadDensity() {
     return EdgeInsets.symmetric(
-      horizontal: switch (_settings.get(numpadDensitySetting)) {
+      horizontal: switch (_settings.get(numpadDensity)) {
         NumpadDensity.comfy => 12,
         NumpadDensity.dense => 32,
         _ => 24,

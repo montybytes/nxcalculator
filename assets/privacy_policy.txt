@@ -1,0 +1,28 @@
+Effective Date: 22 March 2026
+Package Name: com.nxtended.calculator
+
+1. Data Collection
+    No personal information or user data is collected by NxCalculator. No data leaves the device.
+
+2. Local Storage
+    - Calculation History: Stored locally in app cache only.
+    - Security: No internet access is requested; data will not be transmitted externally.
+
+3. Permissions
+    No Android permissions are requested.
+    Screen On: The option to keep the screen active uses standard system APIs and can be disabled in Settings.
+
+4. Data Deletion
+    All stored data is removed by:
+        - Uninstalling the app.
+        - Clearing app data via device's settings.
+
+5. Third-Party Services
+    No third-party analytics, advertising, or data-sharing services are integrated.
+
+6. Policy Updates & Notifications
+    If this privacy policy is updated, a notification will be displayed within the app upon the next launch after an update. Continued use of the app constitutes acceptance of the revised policy.
+
+7. Contact
+    For inquiries, please contact:
+    montybytes@gmail.com

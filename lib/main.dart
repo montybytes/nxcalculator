@@ -4,8 +4,7 @@ import "package:nxcalculator/registries/settings.dart";
 import "package:nxcalculator/repositories/settings.dart";
 import "package:nxcalculator/screens/home/home.dart";
 import "package:nxcalculator/services/screen_timeout.dart";
-import "package:nxcalculator/theme/dark.dart";
-import "package:nxcalculator/theme/light.dart";
+import "package:nxdesign/themes.dart";
 import "package:provider/provider.dart";
 
 Future<void> main() async {
@@ -27,11 +26,23 @@ class App extends StatefulWidget {
 
 class _AppState extends State<App> with WidgetsBindingObserver {
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
     super.didChangeAppLifecycleState(state);
     if (state == AppLifecycleState.resumed) {
       final settings = context.read<SettingsRepository>();
-      final keepScreenOn = settings.get(keepScreenAwakeSetting);
+      final keepScreenOn = settings.get(keepScreenAwake);
       if (keepScreenOn) {
         await ScreenTimeoutService.setKeepScreenOn(true);
       }
@@ -42,13 +53,13 @@ class _AppState extends State<App> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return Consumer<SettingsRepository>(
       builder: (context, repo, child) {
-        final themeMode = repo.get(themeModeSetting);
+        final mode = repo.get(themeMode);
 
         return MaterialApp(
           title: "NxCalculator",
-          theme: lightTheme,
-          darkTheme: darkTheme,
-          themeMode: themeMode,
+          theme: NxTheme.lightTheme,
+          darkTheme: NxTheme.darkTheme,
+          themeMode: mode,
           home: const HomeScreen(),
         );
       },

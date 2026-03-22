@@ -26,17 +26,24 @@ extension StringCasingExtension on String {
   }
 }
 
-String getFormattedResult(
-  String result, {
+String getFormattedToken(
+  String token, {
   int maxIntegerDigits = 13,
   int maxFractionDigits = 12,
-  bool noSeparator = false,
+  bool noGrouping = false,
   SettingsRepository? settings,
 }) {
-  final number = Decimal.tryParse(result);
+  final number = Decimal.tryParse(token);
 
-  if (result.isEmpty || number == null) {
-    return result;
+  final groupSep = settings?.get(groupingSeparator);
+  final decimalSep = settings?.get(decimalSeparator);
+
+  if (token == ".") {
+    return mapDecimalSeparator(decimalSep);
+  }
+
+  if (token.isEmpty || number == null) {
+    return token;
   }
 
   final format = NumberFormat.decimalPattern();
@@ -77,7 +84,7 @@ String getFormattedResult(
     format.maximumFractionDigits = fractionDigits;
     format.minimumFractionDigits = 0;
 
-    if (noSeparator) {
+    if (noGrouping) {
       format.turnOffGrouping();
     }
 
@@ -85,7 +92,8 @@ String getFormattedResult(
 
     return _getFormattedNumber(
       "$sign${formatter.format(mantissa)}E$exponent",
-      settings,
+      groupingSep: groupSep,
+      decimalSep: decimalSep,
     );
   }
 
@@ -113,7 +121,7 @@ String getFormattedResult(
       format.maximumFractionDigits = fractionDigits;
       format.minimumFractionDigits = 0;
 
-      if (noSeparator) {
+      if (noGrouping) {
         format.turnOffGrouping();
       }
 
@@ -121,7 +129,8 @@ String getFormattedResult(
 
       return _getFormattedNumber(
         "$sign${formatter.format(mantissa)}E$exponent",
-        settings,
+        groupingSep: groupSep,
+        decimalSep: decimalSep,
       );
     }
   }
@@ -134,14 +143,15 @@ String getFormattedResult(
   format.maximumFractionDigits = fractionDigits;
   format.minimumFractionDigits = 0;
 
-  if (noSeparator) {
+  if (noGrouping) {
     format.turnOffGrouping();
   }
 
   formatter = DecimalFormatter(format);
   return _getFormattedNumber(
     formatter.format(Decimal.parse(number.toStringAsFixed(fractionDigits))),
-    settings,
+    groupingSep: groupSep,
+    decimalSep: decimalSep,
   );
 }
 
@@ -159,31 +169,7 @@ String getSystemGroupingSeparator() {
   return symbols.GROUP_SEP;
 }
 
-String _getFormattedNumber(String number, SettingsRepository? settings) {
-  final groupingSeparator = settings?.get(groupingSeparatorSetting);
-  final decimalSeparator = settings?.get(decimalSeparatorSetting);
-
-  final parts = number.split(".");
-
-  final groupSep = mapGroupingSeparator(
-    groupingSeparator ?? GroupingSeparator.system,
-  );
-  final decimalSep = mapDecimalSeparator(
-    decimalSeparator ?? DecimalSeparator.system,
-  );
-
-  if (parts.length > 1) {
-    return "${parts[0].replaceAll(",", groupSep)}$decimalSep${parts[1]}";
-  }
-
-  if (parts.length == 1 && parts[0].contains(",")) {
-    return parts[0].replaceAll(",", groupSep);
-  }
-
-  return number;
-}
-
-String mapGroupingSeparator(GroupingSeparator separator) {
+String mapGroupingSeparator(GroupingSeparator? separator) {
   switch (separator) {
     case GroupingSeparator.comma:
       return ",";
@@ -191,18 +177,39 @@ String mapGroupingSeparator(GroupingSeparator separator) {
       return ".";
     case GroupingSeparator.space:
       return " ";
-    case GroupingSeparator.system:
+    default:
       return getSystemGroupingSeparator();
   }
 }
 
-String mapDecimalSeparator(DecimalSeparator separator) {
+String mapDecimalSeparator(DecimalSeparator? separator) {
   switch (separator) {
     case DecimalSeparator.dot:
       return ".";
     case DecimalSeparator.comma:
       return ",";
-    case DecimalSeparator.system:
+    default:
       return getSystemDecimalSeparator();
   }
+}
+
+String _getFormattedNumber(
+  String number, {
+  GroupingSeparator? groupingSep,
+  DecimalSeparator? decimalSep,
+}) {
+  final parts = number.split(".");
+
+  final gSep = mapGroupingSeparator(groupingSep);
+  final dSep = mapDecimalSeparator(decimalSep);
+
+  if (parts.length > 1) {
+    return "${parts[0].replaceAll(",", gSep)}$dSep${parts[1]}";
+  }
+
+  if (parts.length == 1 && parts[0].contains(",")) {
+    return parts[0].replaceAll(",", gSep);
+  }
+
+  return number;
 }

@@ -3,7 +3,7 @@ description: "A calculator that fits into the Nothing OS ecosystem of apps."
 
 publish_to: "none"
 
-version: 1.2.1-a
+version: 1.3.0
 
 environment:
   sdk: ^3.8.1
@@ -13,6 +13,10 @@ dependencies:
   flutter:
     sdk: flutter
   intl: ^0.20.2
+  nxdesign:
+    git:
+      url: https://github.com/montybytes/nxdesign.git
+      ref: main
   provider: ^6.1.5+1
   shared_preferences: ^2.5.3
 
@@ -22,24 +26,6 @@ dev_dependencies:
     sdk: flutter
   shared_preferences_platform_interface: ^2.4.1
 
-flutter:
+flutter: 
   assets:
-    - assets/
-    - assets/fonts/
-    - assets/icons/
-    - assets/icons/light/
-    - assets/icons/dark/
-
-  fonts:
-    - family: NType
-      fonts:
-        - asset: assets/fonts/NType82.otf
-    - family: NDot
-      fonts:
-        - asset: assets/fonts/NDot77.otf
-    - family: LetteraMono
-      fonts:
-        - asset: assets/fonts/LetteraMono.otf
-    - family: Inter
-      fonts:
-        - asset: assets/fonts/Inter.otf
+   - assets/privacy_policy.txt

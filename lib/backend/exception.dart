@@ -1,7 +1,7 @@
-class CalculatorException implements Exception{
+class CalculatorException implements Exception {
   final String message;
 
-  CalculatorException(this.message);
+  const CalculatorException(this.message);
 
   @override
   String toString() {

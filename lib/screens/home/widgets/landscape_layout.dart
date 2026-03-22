@@ -10,6 +10,8 @@ import "package:nxcalculator/screens/home/widgets/dynamic_appbar.dart";
 import "package:nxcalculator/screens/home/widgets/history_listview.dart";
 import "package:nxcalculator/screens/home/widgets/landscape_keypad.dart";
 import "package:nxcalculator/widgets/slide_page_route.dart";
+import "package:nxdesign/fonts.dart";
+import "package:nxdesign/widgets.dart";
 import "package:provider/provider.dart";
 
 class LandscapeLayout extends StatefulWidget {
@@ -20,19 +22,14 @@ class LandscapeLayout extends StatefulWidget {
 }
 
 class _LandscapeLayoutState extends State<LandscapeLayout> {
-  final focusNode = FocusNode();
-
-  bool _collapsed = true;
+  var _collapsed = true;
 
   CalculatorRepository get _calculator => context.read<CalculatorRepository>();
   SettingsRepository get _settings => context.read<SettingsRepository>();
 
-  bool get _isDark => Theme.of(context).brightness == Brightness.dark;
-
   @override
   void initState() {
     super.initState();
-    focusNode.requestFocus();
   }
 
   @override
@@ -50,9 +47,7 @@ class _LandscapeLayoutState extends State<LandscapeLayout> {
                     children: [
                       IconButton(
                         tooltip: "Settings",
-                        icon: _isDark
-                            ? Image.asset("assets/icons/dark/settings.png")
-                            : Image.asset("assets/icons/light/settings.png"),
+                        icon: const NxIcon(path: NxIcon.settings),
                         padding: const EdgeInsets.all(14),
                         onPressed: () {
                           Navigator.of(
@@ -62,9 +57,7 @@ class _LandscapeLayoutState extends State<LandscapeLayout> {
                       ),
                       IconButton(
                         tooltip: "Toggle Sidebar",
-                        icon: _isDark
-                            ? Image.asset("assets/icons/dark/panel_open.png")
-                            : Image.asset("assets/icons/light/panel_open.png"),
+                        icon: const NxIcon(path: NxIcon.leftPanelOpen),
                         padding: const EdgeInsets.all(14),
                         onPressed: () {
                           setState(() => _collapsed = !_collapsed);
@@ -81,13 +74,7 @@ class _LandscapeLayoutState extends State<LandscapeLayout> {
                         actions: [
                           IconButton(
                             tooltip: "Toggle Sidebar",
-                            icon: _isDark
-                                ? Image.asset(
-                                    "assets/icons/dark/panel_close.png",
-                                  )
-                                : Image.asset(
-                                    "assets/icons/light/panel_close.png",
-                                  ),
+                            icon: const NxIcon(path: NxIcon.leftPanelClose),
                             padding: const EdgeInsets.all(14),
                             onPressed: () {
                               setState(() => _collapsed = !_collapsed);
@@ -105,18 +92,7 @@ class _LandscapeLayoutState extends State<LandscapeLayout> {
                                   repo: _calculator,
                                   onTapItem: (item) {
                                     repo.clear();
-                                    if (item.result.contains("E")) {
-                                      if (item.result.startsWith("-")) {
-                                        repo.addOperation("-");
-                                        repo.insertToken(
-                                          item.result.substring(1),
-                                        );
-                                      } else {
-                                        repo.insertToken(item.result);
-                                      }
-                                    } else {
-                                      repo.insertToken(item.result);
-                                    }
+                                    repo.insertToken(item.result);
                                   },
                                   onDelete: (index) async {
                                     await repo.removeFromHistory(index);
@@ -142,11 +118,10 @@ class _LandscapeLayoutState extends State<LandscapeLayout> {
                   Consumer<CalculatorRepository>(
                     builder: (context, repo, child) {
                       return EquationInputField(
-                        equation: repo.equation,
                         maxFontSize: 44,
                         minFontSize: 44,
-                        focusNode: focusNode,
-                        style: const TextStyle(height: 1),
+                        cursor: repo.cursor,
+                        equation: repo.equation,
                         onSelectionChanged: (cursorPosition) {
                           repo.setCursorFromCharOffset(cursorPosition);
                         },
@@ -158,7 +133,7 @@ class _LandscapeLayoutState extends State<LandscapeLayout> {
                       final text = repo.result == "" && repo.error != ""
                           ? repo.error
                           : !repo.isPureNumberExpression
-                          ? getFormattedResult(
+                          ? getFormattedToken(
                               repo.result,
                               maxIntegerDigits: 18,
                               maxFractionDigits: 18,
@@ -173,10 +148,10 @@ class _LandscapeLayoutState extends State<LandscapeLayout> {
                           height: 1,
                           fontSize: 38,
                           color: Colors.grey[600],
-                          fontFamily: _settings.get(equationResultFontSetting),
+                          fontFamily: _settings.get(equationResultFont),
                           letterSpacing:
-                              _settings.get(equationResultFontSetting) ==
-                                  "LetteraMono"
+                              _settings.get(equationResultFont) ==
+                                  NxFonts.fontLettera
                               ? -6
                               : null,
                         ),
@@ -247,7 +222,7 @@ class _LandscapeLayoutState extends State<LandscapeLayout> {
                           if (await _calculator.saveHistory(
                             item,
                             preventDuplicate: _settings.get(
-                              preventDuplicateHistorySetting,
+                              preventDuplicateHistory,
                             ),
                           )) {
                             _calculator.clear();
