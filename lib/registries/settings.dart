@@ -103,9 +103,9 @@ final Setting<bool> swapDecimalZero = Setting(
 final Setting<bool> preferBottomToolbar = Setting(
   key: "prefer_bottom_toolbar",
   category: Category.appearance,
-  read: (prefs) async => await prefs.getBool(preferIconsToText.key) ?? false,
+  read: (prefs) async => await prefs.getBool(preferBottomToolbar.key) ?? false,
   write: (prefs, value) async {
-    await _writeToStorageHelper(prefs, preferIconsToText.key, value);
+    await _writeToStorageHelper(prefs, preferBottomToolbar.key, value);
   },
   buildTile: (repo, value, shape) {
     return _buildBooleanTile(
@@ -405,7 +405,7 @@ final Setting<bool> keepScreenAwake = Setting(
           "Prevent screen from locking\n"
           "Use this sparingly for OLED/AMOLED screens due to risk of pixel burn-in if left on for extended periods",
       currentValue: value as bool,
-      onUpdate: () async => await repo.set(swipeUpHistory, !value),
+      onUpdate: () async => await repo.set(keepScreenAwake, !value),
     );
   },
 );
