@@ -38,6 +38,7 @@ class LicensesScreen extends StatelessWidget {
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ),
+                const SizedBox(height: 24),
                 Expanded(
                   child: Scrollbar(
                     thickness: 16,
