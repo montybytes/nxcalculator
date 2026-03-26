@@ -48,7 +48,20 @@ class SettingsScreen extends StatelessWidget {
                       icon: const NxIcon(path: NxIcon.reset),
                       padding: const EdgeInsets.all(14),
                       onPressed: () async {
-                        await settings.resetAll();
+                        final shouldReset = await showDialog<bool>(
+                          context: context,
+                          builder: (context) => const ConfirmActionDialog(
+                            titleText: "Reset All Settings",
+                            infoText:
+                                "Are you sure you want to reset everything?",
+                            isWarning: true,
+                            confirmText: "RESET ALL",
+                          ),
+                        );
+
+                        if (shouldReset ?? false) {
+                          await settings.resetAll();
+                        }
                       },
                     ),
                   ],
