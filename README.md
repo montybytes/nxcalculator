@@ -7,7 +7,8 @@ A simple calculator app that follows the design language of Nothing OS for Nothi
 
 To test the app, find the `.apk` in [releases](https://github.com/montybytes/nxcalculator/releases) that matches your phone's architecture and download it or use `nxcalculator-release.apk` if you do not know the architechture.
 Install from storage and (maybe) enjoy using the app.
-Feedback is always welcome!
+
+- Feedback is always welcome!
 
 
 
