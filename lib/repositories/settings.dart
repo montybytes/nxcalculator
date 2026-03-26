@@ -15,6 +15,8 @@ class SettingsRepository with ChangeNotifier {
   }
 
   Future<void> load() async {
+    _cache.clear();
+
     for (final setting in allSettings) {
       final value = await setting.read(_prefs);
       _cache[setting.key] = value;
@@ -38,6 +40,12 @@ class SettingsRepository with ChangeNotifier {
   Future<void> set<T>(Setting<T> setting, T value) async {
     _cache[setting.key] = value;
     await setting.write(_prefs, value);
+    notifyListeners();
+  }
+
+  Future<void> resetAll() async {
+    await _prefs.clear();
+    await load();
     notifyListeners();
   }
 }

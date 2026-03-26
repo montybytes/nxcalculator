@@ -13,8 +13,8 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<SettingsRepository>(
-      builder: (context, repo, child) {
-        final grouped = repo.getGrouped();
+      builder: (context, settings, child) {
+        final grouped = settings.getGrouped();
 
         return Scaffold(
           body: SafeArea(
@@ -42,6 +42,16 @@ class SettingsScreen extends StatelessWidget {
                       Navigator.of(context).pop();
                     },
                   ),
+                  actions: [
+                    IconButton(
+                      tooltip: "Reset All",
+                      icon: const NxIcon(path: NxIcon.reset),
+                      padding: const EdgeInsets.all(14),
+                      onPressed: () async {
+                        await settings.resetAll();
+                      },
+                    ),
+                  ],
                 ),
                 Expanded(
                   child: Consumer<SettingsRepository>(
