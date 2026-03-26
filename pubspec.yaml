@@ -26,6 +26,6 @@ dev_dependencies:
     sdk: flutter
   shared_preferences_platform_interface: ^2.4.1
 
-flutter: 
+flutter:
   assets:
-   - assets/privacy_policy.txt
+    - assets/privacy_policy.txt

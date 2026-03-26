@@ -205,7 +205,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: f0e015df20550ac32b72f2d3dff59e0f03f0d6e2
+      resolved-ref: "9b1d64cf35da2bf09759af9f536917375e360221"
       url: "https://github.com/montybytes/nxdesign.git"
     source: git
     version: "1.1.0"
