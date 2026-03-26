@@ -1,12 +1,11 @@
-import "package:flutter/material.dart" hide Switch, Checkbox;
+import "package:flutter/material.dart" hide Switch, Checkbox, Radio;
 import "package:nxcalculator/models/setting.dart";
 import "package:nxcalculator/screens/settings/licenses.dart";
 import "package:nxcalculator/screens/settings/privacy_policy.dart";
 import "package:nxcalculator/services/screen_timeout.dart";
 import "package:nxcalculator/widgets/slide_page_route.dart";
 import "package:nxdesign/fonts.dart";
-import "package:nxdesign/widgets.dart"
-    show MultiSetting, MultiSettingData, NxIcon, Switch;
+import "package:nxdesign/widgets.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 final allSettings = <Setting>[
@@ -534,7 +533,7 @@ Widget _buildExpandableTile<T>({
                 "$value",
                 style: TextStyle(fontFamily: value is String ? value : null),
               ),
-              trailing: Switch(
+              trailing: Radio(
                 value: currentValue == value,
                 onChanged: (_) => onUpdate(value),
               ),
