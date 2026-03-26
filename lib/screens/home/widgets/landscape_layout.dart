@@ -10,7 +10,6 @@ import "package:nxcalculator/screens/home/widgets/dynamic_appbar.dart";
 import "package:nxcalculator/screens/home/widgets/history_listview.dart";
 import "package:nxcalculator/screens/home/widgets/landscape_keypad.dart";
 import "package:nxcalculator/widgets/slide_page_route.dart";
-import "package:nxdesign/fonts.dart";
 import "package:nxdesign/widgets.dart";
 import "package:provider/provider.dart";
 
@@ -149,11 +148,6 @@ class _LandscapeLayoutState extends State<LandscapeLayout> {
                           fontSize: 38,
                           color: Colors.grey[600],
                           fontFamily: _settings.get(equationResultFont),
-                          letterSpacing:
-                              _settings.get(equationResultFont) ==
-                                  NxFonts.fontLettera
-                              ? -6
-                              : null,
                         ),
                       );
                     },

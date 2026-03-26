@@ -5,7 +5,6 @@ import "package:nxcalculator/repositories/calculator.dart";
 import "package:nxcalculator/repositories/settings.dart";
 import "package:nxcalculator/utils/strings.dart";
 import "package:nxdesign/colors.dart";
-import "package:nxdesign/fonts.dart";
 import "package:nxdesign/widgets.dart";
 import "package:provider/provider.dart";
 
@@ -16,6 +15,7 @@ class EquationInputField extends StatefulWidget {
     this.cursor = 0,
     this.maxFontSize = 48,
     this.minFontSize = 12,
+    this.clip = true,
     super.key,
   });
 
@@ -24,6 +24,7 @@ class EquationInputField extends StatefulWidget {
   final int cursor;
   final double maxFontSize;
   final double minFontSize;
+  final bool clip;
 
   @override
   State<EquationInputField> createState() => _EquationInputFieldState();
@@ -99,7 +100,7 @@ class _EquationInputFieldState extends State<EquationInputField> {
 
             return SingleChildScrollView(
               reverse: true,
-              clipBehavior: Clip.none,
+              clipBehavior: widget.clip ? Clip.hardEdge : Clip.none,
               controller: _scrollController,
               scrollDirection: Axis.horizontal,
               child: EditableText(
@@ -122,22 +123,26 @@ class _EquationInputFieldState extends State<EquationInputField> {
                 selectionControls: CalculatorSelectionControls(
                   onMessage: (message) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      // TODO: update theme with snackbar theme
                       const SnackBar(
                         elevation: 0,
                         shape: StadiumBorder(),
                         behavior: SnackBarBehavior.floating,
-                        backgroundColor: NxColors.nothingRed,
+                        backgroundColor: NxColors.nothingYellow,
                         duration: Duration(milliseconds: 1500),
-                        margin: EdgeInsets.fromLTRB(80, 0, 80, 18),
+                        margin: EdgeInsets.fromLTRB(80, 0, 80, 48),
                         content: Center(
                           child: Row(
                             spacing: 8,
                             children: [
-                              NxIcon(path: NxIcon.block),
+                              NxIcon(
+                                path: NxIcon.block,
+                                color: NxColors.lightThemeText,
+                              ),
                               Text(
-                                "Pasted value too large!",
-                                style: TextStyle(color: NxColors.darkThemeText),
+                                "Pasted text is too large!",
+                                style: TextStyle(
+                                  color: NxColors.lightThemeText,
+                                ),
                               ),
                             ],
                           ),
@@ -151,7 +156,6 @@ class _EquationInputFieldState extends State<EquationInputField> {
                   height: 1,
                   fontFamily: font,
                   fontSize: fontSize,
-                  letterSpacing: font == NxFonts.fontLettera ? -6 : null,
                 ),
                 onChanged: (value) {
                   if (value.isEmpty) {

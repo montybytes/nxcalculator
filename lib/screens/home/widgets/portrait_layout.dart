@@ -10,7 +10,6 @@ import "package:nxcalculator/screens/home/widgets/dynamic_appbar.dart";
 import "package:nxcalculator/screens/home/widgets/history_listview.dart";
 import "package:nxcalculator/screens/home/widgets/portrait_keypad.dart";
 import "package:nxdesign/colors.dart";
-import "package:nxdesign/fonts.dart";
 import "package:nxdesign/widgets.dart";
 import "package:provider/provider.dart";
 
@@ -82,6 +81,7 @@ class _PortraitLayoutState extends State<PortraitLayout> {
                       return Padding(
                         padding: _getNumpadDensity(),
                         child: EquationInputField(
+                          clip: false,
                           maxFontSize: 72,
                           minFontSize: 38,
                           cursor: repo.cursor,
@@ -96,12 +96,23 @@ class _PortraitLayoutState extends State<PortraitLayout> {
                   const Flexible(child: SizedBox(height: 24)),
                   Consumer<CalculatorRepository>(
                     builder: (context, repo, child) {
+                      final font = _settings.get(equationResultFont);
+                      final color = Colors.grey[600];
+                      final fontSize = _getNumpadDensity().horizontal > 24
+                          ? 38.0
+                          : 40.0;
+                      final style = TextStyle(
+                        height: 1,
+                        color: color,
+                        fontFamily: font,
+                        fontSize: fontSize,
+                      );
                       final text = repo.result == "" && repo.error != ""
                           ? repo.error
                           : !repo.isPureNumberExpression
                           ? getFormattedToken(
                               repo.result,
-                              maxIntegerDigits: 13,
+                              maxIntegerDigits: 12,
                               maxFractionDigits: 13,
                               settings: settings,
                             )
@@ -109,28 +120,24 @@ class _PortraitLayoutState extends State<PortraitLayout> {
 
                       return Padding(
                         padding: _getNumpadDensity(),
-                        child: SelectableText(
-                          text,
-                          maxLines: 1,
-                          textAlign: TextAlign.end,
-                          style: TextStyle(
-                            height: 1,
-                            fontSize: _getNumpadDensity().horizontal > 24
-                                ? 38
-                                : 40,
-                            color: Colors.grey[600],
-                            fontFamily: _settings.get(equationResultFont),
-                            letterSpacing:
-                                _settings.get(equationResultFont) ==
-                                    NxFonts.fontLettera
-                                ? -7
-                                : null,
-                          ),
-                        ),
+                        child: repo.error.isNotEmpty
+                            ? SizedBox(
+                                height: fontSize,
+                                child: FittedBox(
+                                  alignment: AlignmentGeometry.centerRight,
+                                  child: Text(text, style: style),
+                                ),
+                              )
+                            : SelectableText(
+                                text,
+                                maxLines: 1,
+                                textAlign: TextAlign.end,
+                                style: style,
+                              ),
                       );
                     },
                   ),
-                  const Spacer(),
+                  const Flexible(child: SizedBox(height: 16)),
                   settings.get(preferBottomToolbar)
                       ? SizedBox(
                           height: 56,

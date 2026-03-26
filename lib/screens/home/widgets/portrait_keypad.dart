@@ -53,7 +53,7 @@ class _PortraitKeypadState extends State<PortraitKeypad> {
 
   Map<String, String> get _basicKeypadValues => {
     "{clear}": "AC",
-    "{bracket}": "()",
+    "{bracket}": "( )",
     "{percent}": "%",
     "{divide}": "÷",
     "{digit_7}": "7",
@@ -301,34 +301,26 @@ class _PortraitKeypadState extends State<PortraitKeypad> {
           strutStyle: extendedStrut,
           textAlign: TextAlign.center,
         );
-      case "{delete}"
-          when _settings.get(preferIconsToText) && font == NxFonts.fontNDot:
-        return SizedBox.square(
-          dimension: 48,
-          child: Text(
-            "<<",
-            style: numpadStyle,
-            strutStyle: StrutStyle(
-              forceStrutHeight: true,
-              height: widget.isExtended ? 1.2 : 0.9,
-              fontSize: widget.isExtended ? 40 : 52,
+      case "{delete}" when _settings.get(preferIconsToText):
+        if (font == NxFonts.fontNDot) {
+          return SizedBox.square(
+            dimension: 48,
+            child: Text(
+              "<<",
+              style: numpadStyle,
+              strutStyle: StrutStyle(
+                forceStrutHeight: true,
+                height: widget.isExtended ? 1.2 : 0.9,
+                fontSize: widget.isExtended ? 40 : 52,
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
-          ),
-        );
-      case "{delete}":
+          );
+        }
+
         return const SizedBox.square(
           dimension: 48,
           child: NxIcon(path: NxIcon.backspace),
-        );
-
-      case "{bracket}"
-          when font == NxFonts.fontNType || font == NxFonts.fontInter:
-        return Text(
-          "( )",
-          style: numpadStyle,
-          strutStyle: numpadStrut,
-          textAlign: TextAlign.center,
         );
       default:
         return Text(

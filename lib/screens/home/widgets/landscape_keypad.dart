@@ -3,7 +3,6 @@ import "dart:async";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:nxcalculator/registries/settings.dart";
-import "package:nxcalculator/repositories/calculator.dart";
 import "package:nxcalculator/repositories/settings.dart";
 import "package:nxcalculator/utils/strings.dart";
 import "package:nxdesign/colors.dart";
@@ -86,7 +85,7 @@ class _LandscapeKeypadState extends State<LandscapeKeypad> {
         ? mapDecimalSeparator(_settings.get(decimalSeparator))
         : "0",
     "{percent}": "%",
-    "{bracket}": "()",
+    "{bracket}": "( )",
     "{equals}": "=",
   };
 
@@ -103,8 +102,8 @@ class _LandscapeKeypadState extends State<LandscapeKeypad> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<CalculatorRepository>(
-      builder: (context, repo, child) {
+    return Consumer<SettingsRepository>(
+      builder: (context, settings, child) {
         return GridView.builder(
           shrinkWrap: true,
           itemCount: _keypadValues.length,
@@ -232,30 +231,21 @@ class _LandscapeKeypadState extends State<LandscapeKeypad> {
           strutStyle: functionsStrut,
           textAlign: TextAlign.center,
         );
-      case "{delete}"
-          when _settings.get(preferIconsToText) &&
-              font == NxFonts.fontNDot:
-        return Center(
-          child: Text(
-            "<<",
-            style: numpadStyle,
-            strutStyle: numpadStrut,
-            textAlign: TextAlign.center,
-          ),
-        );
-      case "{delete}":
+      case "{delete}" when _settings.get(preferIconsToText):
+        if (font == NxFonts.fontNDot) {
+          return Center(
+            child: Text(
+              "<<",
+              style: numpadStyle,
+              strutStyle: numpadStrut,
+              textAlign: TextAlign.center,
+            ),
+          );
+        }
+
         return const SizedBox.square(
           dimension: 28,
           child: NxIcon(path: NxIcon.backspace),
-        );
-
-      case "{bracket}"
-          when font == NxFonts.fontNType || font == NxFonts.fontInter:
-        return Text(
-          "( )",
-          style: numpadStyle,
-          strutStyle: numpadStrut,
-          textAlign: TextAlign.center,
         );
       default:
         return Text(
