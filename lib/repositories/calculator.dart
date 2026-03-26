@@ -58,7 +58,7 @@ class CalculatorRepository with ChangeNotifier {
   bool get isPureNumberExpression {
     var hasDecimal = false;
 
-    if (equation.length == 1 && _isConstant(equation[0])) {
+    if (equation.length == 1 && !_isConstant(equation[0])) {
       return true;
     }
 

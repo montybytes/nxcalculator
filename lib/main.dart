@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import "package:intl/intl.dart";
 import "package:nxcalculator/registries/settings.dart";
+import "package:nxcalculator/repositories/calculator.dart";
 import "package:nxcalculator/repositories/settings.dart";
 import "package:nxcalculator/screens/home/home.dart";
 import "package:nxcalculator/services/screen_timeout.dart";
@@ -11,10 +12,19 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   Intl.defaultLocale = Intl.systemLocale;
 
-  final settingsRepo = SettingsRepository();
-  await settingsRepo.load();
+  final calculator = CalculatorRepository();
+  final settings = SettingsRepository();
+  await settings.load();
 
-  runApp(ChangeNotifierProvider.value(value: settingsRepo, child: const App()));
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: calculator),
+        ChangeNotifierProvider.value(value: settings),
+      ],
+      child: const App(),
+    ),
+  );
 }
 
 class App extends StatefulWidget {

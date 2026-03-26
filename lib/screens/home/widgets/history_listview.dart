@@ -34,40 +34,46 @@ class _HistoryListviewState extends State<HistoryListview> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      spacing: 16,
-      children: [
-        _buildHeader(),
-        Expanded(
-          child: (widget.repo.history.isEmpty)
-              ? const SafeArea(
-                  child: Center(
-                    child: Text(
-                      "No items to display",
-                      style: TextStyle(fontSize: 18),
-                    ),
-                  ),
-                )
-              : Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: CustomScrollView(
-                    slivers: [
-                      SliverList.separated(
-                        itemCount: widget.repo.history.length,
-                        itemBuilder: (context, index) {
-                          final item = widget.repo.history[index];
-                          return _buildDismissible(item, index);
-                        },
-                        separatorBuilder: (context, index) {
-                          return const SizedBox(height: 8);
-                        },
+    return Consumer<CalculatorRepository>(
+      builder: (context, calculator, child) {
+        return Column(
+          spacing: 16,
+          children: [
+            _buildHeader(),
+            Expanded(
+              child: (widget.repo.history.isEmpty)
+                  ? const SafeArea(
+                      child: Center(
+                        child: Text(
+                          "No items to display",
+                          style: TextStyle(fontSize: 18),
+                        ),
                       ),
-                      const SliverToBoxAdapter(child: SizedBox(height: 124)),
-                    ],
-                  ),
-                ),
-        ),
-      ],
+                    )
+                  : Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: CustomScrollView(
+                        slivers: [
+                          SliverList.separated(
+                            itemCount: calculator.history.length,
+                            itemBuilder: (context, index) {
+                              final item = calculator.history[index];
+                              return _buildDismissible(item, index);
+                            },
+                            separatorBuilder: (context, index) {
+                              return const SizedBox(height: 8);
+                            },
+                          ),
+                          const SliverToBoxAdapter(
+                            child: SizedBox(height: 124),
+                          ),
+                        ],
+                      ),
+                    ),
+            ),
+          ],
+        );
+      },
     );
   }
 
